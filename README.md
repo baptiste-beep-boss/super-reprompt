@@ -9,7 +9,7 @@ fresh-context agent, and then launches the work in a clean session — and stays
 just want a rename.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Tests](https://img.shields.io/badge/tests-212-brightgreen.svg)](plugins/super-reprompt/tests)
+[![tests](https://github.com/baptiste-beep-boss/super-reprompt/actions/workflows/tests.yml/badge.svg)](https://github.com/baptiste-beep-boss/super-reprompt/actions/workflows/tests.yml)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-5A4FCF.svg)](https://code.claude.com/docs/en/plugins/install)
 [![Measured](https://img.shields.io/badge/evals-published-orange.svg)](plugins/super-reprompt/evals/RESULTS.md)
 
@@ -206,7 +206,7 @@ subjects. Treat the numbers as evidence of testing, not as a promise about your 
 
 ```bash
 cd plugins/super-reprompt
-python -m unittest discover -s tests      # 212 tests
+python -m unittest discover -s tests      # 213 tests
 python dev/measure_loading.py --check     # instruction budget per tier
 claude plugin validate .
 ```
