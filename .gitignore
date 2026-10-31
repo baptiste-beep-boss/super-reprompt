@@ -1,6 +1,21 @@
+# Local runtime data
 __pycache__/
 *.py[cod]
 .super-reprompt/
 .DS_Store
 Thumbs.db
 *.bak-*
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+!.env.template
+*.pem
+*.key
+*.p12
+*.pfx
+*.keystore
+credentials.json
+.credentials.json
+secrets/
