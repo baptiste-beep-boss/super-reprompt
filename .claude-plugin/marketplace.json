@@ -1,0 +1,15 @@
+{
+  "name": "super-reprompt",
+  "description": "Framing tools for Claude Code: turn a vague request into a checkable mission order before any work starts.",
+  "owner": {
+    "name": "baptiste-beep-boss",
+    "url": "https://github.com/baptiste-beep-boss"
+  },
+  "plugins": [
+    {
+      "name": "super-reprompt",
+      "source": "./plugins/super-reprompt",
+      "description": "Interviews you, writes a mission order with yes/no acceptance criteria and a capabilities contract, has it reviewed, then launches the work in a fresh session. Stays silent on one-line edits and factual questions."
+    }
+  ]
+}

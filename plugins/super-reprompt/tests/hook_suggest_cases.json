@@ -1,0 +1,762 @@
+{
+ "version": 1,
+ "about": "Synthetic labelled prompts for hook_suggest.py. Written BEFORE the scorer. should_trigger=true means the hook should print a suggestion for a first prompt in a fresh session. All prompts are invented for this plugin.",
+ "cases": [
+  {
+   "id": "T01",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Je veux que tu fasses l'audit complet de mon projet web, que tu analyses l'architecture et que tu me rédiges un rapport avec les risques."
+  },
+  {
+   "id": "T02",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Je voudrais mettre en place un système de veille sur mes concurrents : collecter les prix sur une dizaine de sites, les consolider dans un tableau et me faire un rapport chaque semaine."
+  },
+  {
+   "id": "T03",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Analyse approfondie de mon portefeuille : faut-il renforcer mes ETF ou garder du cash ? Compare plusieurs stratégies d'allocation et justifie."
+  },
+  {
+   "id": "T04",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Refonte de l'architecture de notre application : migration de la base vers PostgreSQL, restructuration des modules, et plan de déploiement de bout en bout."
+  },
+  {
+   "id": "T05",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Mission : étudier le marché des trottinettes électriques en Europe, comparer cinq concurrents, sources à l'appui, et proposer une stratégie d'entrée avec un budget de 50 000 euros."
+  },
+  {
+   "id": "T06",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "J'aimerais un truc pour suivre mes dépenses, en gros un tableau avec des colonnes par catégorie, idéalement qui se met à jour tout seul, je ne sais pas trop comment faire."
+  },
+  {
+   "id": "T07",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Fais un état de l'art complet sur les méthodes de détection d'anomalies dans les séries temporelles et rédige un mémo de synthèse avec les sources."
+  },
+  {
+   "id": "T08",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Il faut que tu scrapes les offres d'emploi de ces trois sites, que tu extraies les salaires dans un dataset CSV, et que tu produises une analyse comparative."
+  },
+  {
+   "id": "T09",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Projet : application de gestion de stock pour ma boulangerie. Cahier des charges à rédiger, architecture à proposer, et plan de mise en place."
+  },
+  {
+   "id": "T10",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Dois-je investir dans une SCPI ou dans un ETF monde ? Analyse complète avec rendement, fiscalité, risques, et un tableau comparatif."
+  },
+  {
+   "id": "T11",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Je veux une étude approfondie de la concurrence de ma startup, un benchmark chiffré, et une recommandation de stratégie de prix."
+  },
+  {
+   "id": "T12",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Peux-tu migrer toute ma documentation de Confluence vers un wiki Markdown, restructurer les pages, et vérifier les liens ? C'est un gros chantier."
+  },
+  {
+   "id": "T13",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Audit de sécurité complet de l'API : analyse du code, du déploiement, des dépendances, et rapport priorisé."
+  },
+  {
+   "id": "T14",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Organise un projet de refonte de notre site e-commerce : analyse de l'existant, architecture cible, migration des données, budget et planning."
+  },
+  {
+   "id": "T15",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Fais-moi un dossier complet pour choisir entre acheter ou louer un appartement à Lyon : budget, rentabilité, fiscalité, sources officielles."
+  },
+  {
+   "id": "T16",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "I want you to do a comprehensive audit of our codebase, analyze the architecture, and write a report with prioritized risks."
+  },
+  {
+   "id": "T17",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Build a competitor monitoring pipeline: scrape pricing from ten sites, consolidate it into a spreadsheet, and send me a weekly report."
+  },
+  {
+   "id": "T18",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "In-depth analysis of my investment portfolio: should I rebalance toward bonds? Compare three allocation strategies and justify the choice."
+  },
+  {
+   "id": "T19",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Project: migrate our monolith to microservices. I need an architecture proposal, a migration plan, and a budget estimate, end to end."
+  },
+  {
+   "id": "T20",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Research the electric scooter market in Europe, compare five competitors with sources, and propose an entry strategy under a 50k budget."
+  },
+  {
+   "id": "T21",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "I'd like something to track my expenses, kind of a spreadsheet with columns per category, ideally updating itself, not sure how."
+  },
+  {
+   "id": "T22",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Write a thorough literature review on anomaly detection for time series, with sources, and a summary memo."
+  },
+  {
+   "id": "T23",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "I need you to extract the salaries from these three job boards into a dataset, consolidate it, and produce a comparative analysis report."
+  },
+  {
+   "id": "T24",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Redesign our onboarding flow from scratch: analysis of the current funnel, new architecture, copy, and an implementation roadmap."
+  },
+  {
+   "id": "T25",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Should I rent or buy a flat in Berlin? Give me a complete analysis with budget, yield, taxes, and sources."
+  },
+  {
+   "id": "T26",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Full security audit of the API: code review, dependency analysis, deployment review, and a prioritized report."
+  },
+  {
+   "id": "T27",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Plan and implement a complete refactor of the payment module, restructure the tests, and migrate the old endpoints."
+  },
+  {
+   "id": "T28",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "We need a strategy for our product launch: market research, pricing benchmark against competitors, and a budget plan with a deck."
+  },
+  {
+   "id": "T29",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Create a data pipeline that collects daily prices, stores them in a database, and generates a comprehensive weekly report."
+  },
+  {
+   "id": "T30",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Compare these 4 vendors, pick the best one for a 200k contract, and write a decision memo with sources."
+  },
+  {
+   "id": "T31",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "ok, go : fais l'audit complet du projet et rédige un rapport détaillé avec les sources et un budget."
+  },
+  {
+   "id": "T32",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Yes, go ahead and do the full analysis of the whole project and write the report with sources and a budget."
+  },
+  {
+   "id": "T33",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Mission longue : consolider les comptes de cinq associations dans un tableau unique, analyser les écarts, rédiger un rapport pour l'assemblée générale."
+  },
+  {
+   "id": "T34",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Étudie en profondeur la faisabilité d'ouvrir un café : étude de marché, concurrents, budget d'investissement, rentabilité, et plan d'action."
+  },
+  {
+   "id": "T35",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "J'ai plusieurs demandes : je veux un site vitrine, je veux un blog, je veux une newsletter, il faut que ça soit en français et en anglais, idéalement avec un tableau de bord."
+  },
+  {
+   "id": "T36",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "I have several requests: I want a landing page, I want a blog, I need a newsletter, and I'd like a dashboard, ideally multilingual, maybe with analytics."
+  },
+  {
+   "id": "T37",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Build a complete personal finance tracker: parse my bank CSV exports, categorize transactions, build charts, and produce a monthly report."
+  },
+  {
+   "id": "T38",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Peux-tu analyser ces fichiers a.py, b.py, c.py, d.py et refactorer l'architecture pour séparer la logique métier ?"
+  },
+  {
+   "id": "T39",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Compare these links https://a.example/1 https://b.example/2 https://c.example/3 and write a benchmark analysis of the three tools."
+  },
+  {
+   "id": "T40",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Prépare un plan d'allocation d'épargne pour mes 30 000 euros : livret, assurance-vie, ETF, immobilier. Analyse les risques, compare, et recommande une stratégie."
+  },
+  {
+   "id": "T41",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Let's do a deep research project on lithium supply chains: sources, comparison of producers, and a strategic memo for investors."
+  },
+  {
+   "id": "T42",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Réalise une analyse concurrentielle complète du marché des applications de méditation, avec benchmark, sources, et recommandations de positionnement."
+  },
+  {
+   "id": "T43",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "I want to write a technical whitepaper: do thorough research, compare approaches, structure the argument, and produce a polished PDF report."
+  },
+  {
+   "id": "T44",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Mets en place de bout en bout un pipeline CI/CD pour mon projet, avec migration des scripts existants et documentation complète."
+  },
+  {
+   "id": "T45",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Quelle stratégie pour rembourser mes dettes ? Je ne sais pas trop, j'ai 3 crédits, un budget serré, faut-il tout regrouper ? Fais une analyse complète."
+  },
+  {
+   "id": "T46",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Do a complete market analysis for launching a SaaS: competitors benchmark, pricing strategy, budget, and a go-to-market plan, with sources."
+  },
+  {
+   "id": "T47",
+   "lang": "fr",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Réorganise entièrement mon projet de thèse : analyse de la structure actuelle, nouvelle architecture des chapitres, plan de rédaction et calendrier."
+  },
+  {
+   "id": "T48",
+   "lang": "en",
+   "should_trigger": true,
+   "category": "framing-worthy",
+   "prompt": "Write a business plan for a food truck: market study, budget, profitability forecast, competitor comparison, and a funding strategy."
+  },
+  {
+   "id": "N01",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "C'est quoi la différence entre un ETF et une SICAV ?"
+  },
+  {
+   "id": "N02",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "What is the difference between a list and a tuple in Python?"
+  },
+  {
+   "id": "N03",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Où se trouve le fichier de configuration de git sous Windows ?"
+  },
+  {
+   "id": "N04",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "How do I undo my last git commit?"
+  },
+  {
+   "id": "N05",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Combien coûte une licence MIT ? Rappelle-moi si c'est gratuit."
+  },
+  {
+   "id": "N06",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Quelle est la commande pour lister les ports ouverts sous Linux ?"
+  },
+  {
+   "id": "N07",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "What does the flag -rf do in rm?"
+  },
+  {
+   "id": "N08",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Qu'est-ce que le ratio de Sharpe ?"
+  },
+  {
+   "id": "N09",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "What's the capital of Australia?"
+  },
+  {
+   "id": "N10",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Rappelle-moi la syntaxe d'une boucle for en bash."
+  },
+  {
+   "id": "N11",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Renomme la variable foo en bar dans utils.py"
+  },
+  {
+   "id": "N12",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Fix the typo in the README title: 'Instalation' should be 'Installation'."
+  },
+  {
+   "id": "N13",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Ajoute un point-virgule à la fin de la ligne 42 de main.js."
+  },
+  {
+   "id": "N14",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Change the button color to blue in styles.css"
+  },
+  {
+   "id": "N15",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Supprime le commentaire TODO en haut du fichier config.yml."
+  },
+  {
+   "id": "N16",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Rename the function getUser to fetchUser everywhere in src/api.ts"
+  },
+  {
+   "id": "N17",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Passe le timeout de 30 à 60 secondes dans settings.py"
+  },
+  {
+   "id": "N18",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Add a docstring to the parse_date function."
+  },
+  {
+   "id": "N19",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "ok merci"
+  },
+  {
+   "id": "N20",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "oui vas-y"
+  },
+  {
+   "id": "N21",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "Thanks, that works!"
+  },
+  {
+   "id": "N22",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "parfait, continue"
+  },
+  {
+   "id": "N23",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "go"
+  },
+  {
+   "id": "N24",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "yes please"
+  },
+  {
+   "id": "N25",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "non, annule"
+  },
+  {
+   "id": "N26",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "ack",
+   "prompt": "stop"
+  },
+  {
+   "id": "N27",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Salut, ça va ? Tu peux m'aider ?"
+  },
+  {
+   "id": "N28",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Hello! Are you there?"
+  },
+  {
+   "id": "N29",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Je ne comprends pas ta dernière réponse, tu peux reformuler plus simplement ?"
+  },
+  {
+   "id": "N30",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Can you explain that last step again in simpler words?"
+  },
+  {
+   "id": "N31",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Super, merci pour l'explication, c'était très clair."
+  },
+  {
+   "id": "N32",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Why did you choose a dictionary here instead of a list?"
+  },
+  {
+   "id": "N33",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "slash",
+   "prompt": "/clear"
+  },
+  {
+   "id": "N34",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "slash",
+   "prompt": "/super-reprompt:super-reprompt audit complet du projet, avec rapport, sources et budget"
+  },
+  {
+   "id": "N35",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "slash",
+   "prompt": "!git status"
+  },
+  {
+   "id": "N36",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "waiver",
+   "prompt": "go direct : fais l'audit complet du projet et le rapport, sans me poser de questions."
+  },
+  {
+   "id": "N37",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "waiver",
+   "prompt": "Sans cadrage s'il te plaît : analyse complète du portefeuille et rapport avec sources."
+  },
+  {
+   "id": "N38",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "waiver",
+   "prompt": "No framing, just do it: full audit of the codebase with a report, sources and a budget."
+  },
+  {
+   "id": "N39",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "waiver",
+   "prompt": "Don't ask me questions, just write the comprehensive analysis report of the architecture migration."
+  },
+  {
+   "id": "N40",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "In src/billing/invoice.py, change calculate_total() so that it rounds to two decimals using Decimal with ROUND_HALF_UP, add a unit test in tests/test_invoice.py covering 0.005 and 2.675, and do not touch any other file."
+  },
+  {
+   "id": "N41",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Dans le fichier app/routes.py, ajoute une route GET /health qui renvoie {\"status\": \"ok\"} avec le code 200, puis ajoute un test pytest correspondant dans tests/test_health.py. Ne modifie rien d'autre."
+  },
+  {
+   "id": "N42",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Écris une fonction Python is_palindrome(s) qui ignore la casse et les espaces, avec trois tests unitaires."
+  },
+  {
+   "id": "N43",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Write a bash one-liner that counts the lines of all .py files in the current directory recursively."
+  },
+  {
+   "id": "N44",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Convert this JSON to YAML: {\"a\": 1, \"b\": [1,2,3]}"
+  },
+  {
+   "id": "N45",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Traduis en anglais : 'Je serai en retard à la réunion de demain matin.'"
+  },
+  {
+   "id": "N46",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Summarize this paragraph in two sentences: The committee met on Tuesday to discuss the new roof, and members agreed to ask three contractors for quotes before the next meeting."
+  },
+  {
+   "id": "N47",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Quelle heure est-il à Tokyo quand il est 9h à Paris ?"
+  },
+  {
+   "id": "N48",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "precise",
+   "prompt": "Génère une regex qui valide une adresse e-mail simple."
+  },
+  {
+   "id": "N49",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Fais un git diff et dis-moi quels fichiers ont changé."
+  },
+  {
+   "id": "N50",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Lance les tests et dis-moi ceux qui échouent."
+  },
+  {
+   "id": "N51",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "factual",
+   "prompt": "Explain what this error means: TypeError: 'NoneType' object is not subscriptable"
+  },
+  {
+   "id": "N52",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Mets à jour le numéro de version dans package.json en 1.4.2."
+  },
+  {
+   "id": "N53",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Can you check why the build fails on line 12 of build.sh?"
+  },
+  {
+   "id": "N54",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Quel est le meilleur nom pour cette fonction : get_data ou fetch_records ?"
+  },
+  {
+   "id": "N55",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Résume cet article en trois points."
+  },
+  {
+   "id": "N56",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Montre-moi le contenu du dossier src."
+  },
+  {
+   "id": "N57",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "edit",
+   "prompt": "Add a unit test for the edge case where the list is empty."
+  },
+  {
+   "id": "N58",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "J'aimerais comprendre comment fonctionne la récursivité, avec un petit exemple en JavaScript."
+  },
+  {
+   "id": "N59",
+   "lang": "en",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "I would like a short explanation of how HTTP caching works, with one example."
+  },
+  {
+   "id": "N60",
+   "lang": "fr",
+   "should_trigger": false,
+   "category": "chat",
+   "prompt": "Quel budget prévoir pour un café ce week-end ? Environ 20 euros suffisent ?"
+  }
+ ]
+}

@@ -1,0 +1,6 @@
+__pycache__/
+*.py[cod]
+.super-reprompt/
+.DS_Store
+Thumbs.db
+*.bak-*

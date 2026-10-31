@@ -1,0 +1,13 @@
+{
+  "name": "super-reprompt",
+  "displayName": "Super Reprompt",
+  "version": "2.5.0",
+  "description": "Frames a large request before work starts: interview, mission order with acceptance criteria and a capabilities contract, independent review, then a clean launch in a fresh session. Includes an optional one-line suggestion hook.",
+  "author": {
+    "name": "super-reprompt contributors"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/baptiste-beep-boss/super-reprompt",
+  "repository": "https://github.com/baptiste-beep-boss/super-reprompt",
+  "keywords": ["prompting", "planning", "requirements", "workflow", "mission-order", "claude-code", "skills", "agents"]
+}
