@@ -1,6 +1,10 @@
-<div align="center">
-
-# super-reprompt
+<p align="center">
+  <img
+    src="https://github.com/user-attachments/assets/2652b35a-68f6-474d-895b-abdfa6a3cb6d"
+    alt="Super Reprompt"
+    width="100%"
+  />
+</p>
 
 **Stop re-explaining your project to Claude Code. Get a mission order it can execute alone.**
 
