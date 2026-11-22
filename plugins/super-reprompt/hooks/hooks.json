@@ -1,4 +1,7 @@
 {
+  "modules": [
+    "./bar/register.tsx"
+  ],
   "description": "super-reprompt: H1 suggests framing a large request (one line, never blocks), H2 re-injects a short mission reminder after compaction or resume, H3 gates the end of an executing mission. All three fail open and stay silent unless relevant. Set SUPER_REPROMPT_HOOKS=0 to turn them off.",
   "hooks": {
     "UserPromptSubmit": [

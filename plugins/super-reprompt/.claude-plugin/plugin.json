@@ -9,5 +9,15 @@
   "license": "MIT",
   "homepage": "https://github.com/baptiste-beep-boss/super-reprompt",
   "repository": "https://github.com/baptiste-beep-boss/super-reprompt",
-  "keywords": ["prompting", "planning", "requirements", "workflow", "mission-order", "claude-code", "skills", "agents"]
+  "keywords": [
+    "prompting",
+    "planning",
+    "requirements",
+    "workflow",
+    "mission-order",
+    "claude-code",
+    "skills",
+    "agents"
+  ],
+  "types": "./hooks/bar/types/index.d.ts"
 }
