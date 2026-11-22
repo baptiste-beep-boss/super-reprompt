@@ -246,7 +246,8 @@ class PluginFiles(unittest.TestCase):
 
     def test_scripts_use_only_the_standard_library_and_no_network(self):
         allowed = {"argparse", "copy", "shlex", "hashlib", "json", "os", "re", "shutil", "subprocess", "sys", "time", "unicodedata", "pathlib", "_lib",
-                   "validate_order", "glob", "tempfile", "unittest"}
+                   "validate_order", "glob", "tempfile", "unittest",
+                   "sqlite3", "_sqlite3", "zlib"}   # L3 : vault.py (index FTS5, nom de base) - bibliotheque standard
         net = re.compile(r"(?m)^\s*(?:import|from)\s+(socket|urllib|http|requests|ftplib|smtplib|ssl|xmlrpc)\b")
         for p in glob.glob(os.path.join(SCRIPTS, "*.py")):
             with open(p, encoding="utf-8") as f:

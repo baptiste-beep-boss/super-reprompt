@@ -19,5 +19,13 @@
     "skills",
     "agents"
   ],
-  "types": "./hooks/bar/types/index.d.ts"
+  "types": "./hooks/bar/types/index.d.ts",
+  "userConfig": {
+    "vault_path": {
+      "type": "string",
+      "title": "Obsidian vault path",
+      "description": "Folder of your Obsidian vault (optional). Without it, mission memory stays in .super-reprompt/<slug>/memoire/.",
+      "required": false
+    }
+  }
 }
