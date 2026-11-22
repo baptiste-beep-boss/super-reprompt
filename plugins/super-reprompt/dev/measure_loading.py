@@ -13,7 +13,8 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SK = os.path.join(ROOT, "skills", "super-reprompt")
 REFS = os.path.join(SK, "references")
 DIV = 3.7
-LIMITS = {"SKILL.md": 4500, "quick.md": 1900, "quick": 6200, "standard": 17000}
+# v3 ceilings (decision D2, +40 %); SKILL.md applied at 4950, not 6300: past ~5000 tokens compaction truncates the tail.
+LIMITS = {"SKILL.md": 4950, "quick.md": 2660, "quick": 8680, "standard": 23800}
 STD_ORDER = ["phases.md", "interview.md", "order-template.md", "verification.md", "capabilities.md", "models.md",
              "launch.md", "agents.md"]
 

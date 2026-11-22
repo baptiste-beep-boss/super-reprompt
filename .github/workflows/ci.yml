@@ -1,0 +1,35 @@
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main, v3]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: tests (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: plugins/super-reprompt
+    env:
+      PYTHONUTF8: "1"
+    steps:
+      - name: Allow long paths (vendor/ holds deep trees)
+        run: git config --global core.longpaths true
+        working-directory: .
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Loading ceilings (criterion A2)
+        run: python dev/measure_loading.py --check
+      - name: Unit tests and invariants I1-I7 (criteria A1, A21)
+        run: python -m unittest discover -s tests

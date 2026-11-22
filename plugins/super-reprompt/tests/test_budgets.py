@@ -24,8 +24,9 @@ class Budgets(unittest.TestCase):
         self.assertEqual(p.returncode, 0, p.stdout.decode() + p.stderr.decode())
 
     def test_sizes(self):
-        self.assertLessEqual(len(read(SKILL)) / 3.7, 4500)
-        self.assertLessEqual(len(read(os.path.join(REFS, "quick.md"))) / 3.7, 1900)
+        # v3 ceilings (D2, +40 %); SKILL.md applied at 4950 (see dev/measure_loading.py)
+        self.assertLessEqual(len(read(SKILL)) / 3.7, 4950)
+        self.assertLessEqual(len(read(os.path.join(REFS, "quick.md"))) / 3.7, 2660)
 
     def test_quick_is_self_contained(self):
         q = read(os.path.join(REFS, "quick.md"))
