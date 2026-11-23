@@ -22,7 +22,7 @@ class BarWiring(unittest.TestCase):
     def test_hooks_json_declares_the_module_and_keeps_the_command_hooks(self):
         h = json.loads(read(os.path.join(ROOT, "hooks", "hooks.json")))
         self.assertEqual(h["modules"], ["./bar/register.tsx"])
-        self.assertEqual(sorted(h["hooks"]), ["SessionStart", "Stop", "UserPromptSubmit"])
+        self.assertEqual(sorted(h["hooks"]), ["PreToolUse", "SessionStart", "Stop", "UserPromptSubmit"])   # L4 adds the PreToolUse firewall
 
     def test_manifest_still_declares_no_vendor_and_names_the_contract(self):
         m = json.loads(read(os.path.join(ROOT, ".claude-plugin", "plugin.json")))

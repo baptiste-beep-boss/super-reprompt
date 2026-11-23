@@ -221,6 +221,12 @@ The instruction budget is capped on purpose: `standard` reads **16,993 tokens** 
 17,000 ceiling, and every addition has to be paid for by cutting real redundancy elsewhere. The research
 reference adds 1,086 tokens and is counted **separately**, only when the agent is offered, rather than hidden.
 
+## The Vigie (firewall hook) and its limits
+
+During a **sealed** mission (`guard.py seal`), a `PreToolUse` hook blocks, with no token spent: edits to sealed tests, to the order or its criteria, to `SCELLE.json` / `settings.json` / `hooks.json`; `--no-verify` and `SUPER_REPROMPT_HOOKS=0`; writes outside the perimeter; recursive deletes, `reset --hard`, force pushes; any push or publication without a written approval (an *avenant* signed by you in your own terminal); reads of `.env` and key stores; secrets in files or commands; hosts that are not allow-listed; red data going to a relay; spending; financial execution; skill installs without a scan; `except: pass` and skipped tests added to make a run pass. Outside a sealed mission the hook exits at once and says nothing.
+
+**A hook is not a sandbox.** It reads the command text, so a script that writes elsewhere, or an obfuscated command, can pass. What it cannot parse is **detected after the fact** (`guard.py post` compares git state and test fingerprints to the seal; `guard.py drift` flags files with no requirement, requirements with no task, weakened criteria, budget overruns, and test output written without any test run). Detection is not blocking. Inside a mission the hook fails closed on corrupted input; if no Python interpreter is found, the hook cannot run at all and does not block.
+
 ## What ships in the plugin
 
 | | |

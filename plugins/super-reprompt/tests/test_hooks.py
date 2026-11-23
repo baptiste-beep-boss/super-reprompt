@@ -358,6 +358,8 @@ class LauncherChain(TmpCase):
         with open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8") as f:
             hooks = json.load(f)["hooks"]
         for event, entries in hooks.items():
+            if event == "PreToolUse":      # L4 firewall: own launcher, fails closed (see test_guard.py)
+                continue
             cmd = entries[0]["hooks"][0]["command"]
             self.assertIn("python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/", cmd)
             self.assertIn("|| py -3 \"${CLAUDE_PLUGIN_ROOT}/scripts/", cmd)

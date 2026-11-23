@@ -173,7 +173,7 @@ class PluginFiles(unittest.TestCase):
     def test_hooks_file(self):
         with open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8") as f:
             h = json.load(f)["hooks"]
-        self.assertEqual(sorted(h), ["SessionStart", "Stop", "UserPromptSubmit"])
+        self.assertEqual(sorted(h), ["PreToolUse", "SessionStart", "Stop", "UserPromptSubmit"])   # L4: PreToolUse firewall
         self.assertEqual(h["SessionStart"][0]["matcher"], "compact|resume")
         for event, groups in h.items():
             for g in groups:
@@ -247,7 +247,8 @@ class PluginFiles(unittest.TestCase):
     def test_scripts_use_only_the_standard_library_and_no_network(self):
         allowed = {"argparse", "copy", "shlex", "hashlib", "json", "os", "re", "shutil", "subprocess", "sys", "time", "unicodedata", "pathlib", "_lib",
                    "validate_order", "glob", "tempfile", "unittest",
-                   "sqlite3", "_sqlite3", "zlib"}   # L3 : vault.py (index FTS5, nom de base) - bibliotheque standard
+                   "sqlite3", "_sqlite3", "zlib",
+                   "fnmatch", "_json", "guard_core"}   # L3 : vault.py (index FTS5, nom de base) - bibliotheque standard ; L4 : guard.py (fnmatch pour PLAN.json, _json = scanner C du chemin chaud sans import json/re, PREUVES.md preuve 4)
         net = re.compile(r"(?m)^\s*(?:import|from)\s+(socket|urllib|http|requests|ftplib|smtplib|ssl|xmlrpc)\b")
         for p in glob.glob(os.path.join(SCRIPTS, "*.py")):
             with open(p, encoding="utf-8") as f:
