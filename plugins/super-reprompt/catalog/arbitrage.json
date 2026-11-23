@@ -1,0 +1,342 @@
+{
+ "version": 1,
+ "note": "Écrit à la main (L5). Un seul gagnant par fonction et par contexte. Le skill personnel de l'utilisateur gagne toujours (conflit 5).",
+ "conflits": [
+  {
+   "id": "C1",
+   "sujet": "Tests : ECC « 80 % de couverture » contre ponytail « un petit test »",
+   "regle": "L'ordre de mission prime ; sinon : logique à risque = test obligatoire, trivial = aucun test.",
+   "gagnants": [],
+   "complements": [
+    "ecc:rule:common/testing",
+    "ponytail:skill:ponytail",
+    "mattpocock:skill:tdd",
+    "ecc:agent:tdd-guide"
+   ],
+   "doublons": [],
+   "noms": []
+  },
+  {
+   "id": "C2",
+   "sujet": "Revue : ECC, mattpocock, ponytail, superpowers, gstack",
+   "regle": "Relecteur ECC du langage ET axe Spec de mattpocock ; ponytail-review seulement si le diff dépasse 300 lignes. superpowers et gstack : hors catalogue, jamais proposés.",
+   "gagnants": [
+    "ecc:agent:code-reviewer",
+    "mattpocock:skill:code-review"
+   ],
+   "complements": [
+    "ponytail:skill:ponytail-review"
+   ],
+   "doublons": [
+    "ecc:command:code-review"
+   ],
+   "noms": [
+    "code-review"
+   ]
+  },
+  {
+   "id": "C3",
+   "sujet": "Débogage : diagnosing-bugs, superpowers, ECC",
+   "regle": "diagnosing-bugs d'abord ; puis le build-resolver du langage si l'échec est dans le build. superpowers : hors catalogue.",
+   "gagnants": [
+    "mattpocock:skill:diagnosing-bugs"
+   ],
+   "complements": [
+    "ecc:agent:build-error-resolver"
+   ],
+   "doublons": [],
+   "noms": []
+  },
+  {
+   "id": "C4",
+   "sujet": "Planification : ECC plan, v2.5, gstack",
+   "regle": "v2.5 cadre (ordre scellé), ECC découpe (PLAN.json). gstack : hors catalogue.",
+   "gagnants": [
+    "ecc:agent:planner"
+   ],
+   "complements": [
+    "ecc:command:plan",
+    "ecc:skill:blueprint"
+   ],
+   "doublons": [],
+   "noms": []
+  },
+  {
+   "id": "C5",
+   "sujet": "Skill personnel de l'utilisateur sur le même métier",
+   "regle": "Le skill personnel gagne, sans exception ; l'élément du catalogue reste disponible mais n'est pas proposé en premier.",
+   "gagnants": [],
+   "complements": [],
+   "doublons": [],
+   "noms": []
+  }
+ ],
+ "doublons_detectes": [
+  {
+   "nom": "ecc-guide",
+   "gagnant": "ecc:skill:ecc-guide",
+   "doublons": [
+    "ecc:command:ecc-guide"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "issue-review",
+   "gagnant": "ecc:skill:issue-review",
+   "doublons": [
+    "ecc:command:issue-review"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "marketing-campaign",
+   "gagnant": "ecc:skill:marketing-campaign",
+   "doublons": [
+    "ecc:command:marketing-campaign"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "orch-add-feature",
+   "gagnant": "ecc:skill:orch-add-feature",
+   "doublons": [
+    "ecc:command:orch-add-feature"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "orch-build-mvp",
+   "gagnant": "ecc:skill:orch-build-mvp",
+   "doublons": [
+    "ecc:command:orch-build-mvp"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "orch-change-feature",
+   "gagnant": "ecc:skill:orch-change-feature",
+   "doublons": [
+    "ecc:command:orch-change-feature"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "orch-fix-defect",
+   "gagnant": "ecc:skill:orch-fix-defect",
+   "doublons": [
+    "ecc:command:orch-fix-defect"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "orch-refine-code",
+   "gagnant": "ecc:skill:orch-refine-code",
+   "doublons": [
+    "ecc:command:orch-refine-code"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "plan-canvas",
+   "gagnant": "ecc:skill:plan-canvas",
+   "doublons": [
+    "ecc:command:plan-canvas"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "security-scan",
+   "gagnant": "ecc:skill:security-scan",
+   "doublons": [
+    "ecc:command:security-scan"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "skill-host-compat",
+   "gagnant": "ecc:skill:skill-host-compat",
+   "doublons": [
+    "ecc:command:skill-host-compat"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "token-card",
+   "gagnant": "ecc:skill:token-card",
+   "doublons": [
+    "ecc:command:token-card"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ui-canvas",
+   "gagnant": "ecc:skill:ui-canvas",
+   "doublons": [
+    "ecc:command:ui-canvas"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail",
+   "gagnant": "ponytail:skill:ponytail",
+   "doublons": [
+    "ponytail:command:ponytail"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail-audit",
+   "gagnant": "ponytail:skill:ponytail-audit",
+   "doublons": [
+    "ponytail:command:ponytail-audit"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail-debt",
+   "gagnant": "ponytail:skill:ponytail-debt",
+   "doublons": [
+    "ponytail:command:ponytail-debt"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail-gain",
+   "gagnant": "ponytail:skill:ponytail-gain",
+   "doublons": [
+    "ponytail:command:ponytail-gain"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail-help",
+   "gagnant": "ponytail:skill:ponytail-help",
+   "doublons": [
+    "ponytail:command:ponytail-help"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  },
+  {
+   "nom": "ponytail-review",
+   "gagnant": "ponytail:skill:ponytail-review",
+   "doublons": [
+    "ponytail:command:ponytail-review"
+   ],
+   "motif": "la commande est l'alias d'entrée du skill de même nom : le skill porte le contenu"
+  }
+ ],
+ "homonymes_distincts": [
+  {
+   "nom": "chief-of-staff",
+   "membres": [
+    "ecc:agent:chief-of-staff",
+    "mattpocock:skill:chief-of-staff"
+   ],
+   "motif": "même nom, fonctions différentes : l'agent ECC trie les messages, le skill mattpocock coordonne des sous-agents sur un but long"
+  },
+  {
+   "nom": "pr",
+   "membres": [
+    "ecc:command:pr",
+    "mattpocock:skill:pr"
+   ],
+   "motif": "complémentaires : la commande ECC crée la PR (modèles, push), le skill mattpocock rédige le corps de la PR"
+  }
+ ],
+ "fonctions_arbitrees": [
+  [
+   "ecc:agent:tdd-guide",
+   "mattpocock:skill:tdd"
+  ],
+  [
+   "ecc:skill:tdd-workflow",
+   "mattpocock:skill:tdd"
+  ],
+  [
+   "ecc:skill:springboot-tdd",
+   "mattpocock:skill:tdd"
+  ]
+ ],
+ "fonctions_decision": "Même fonction, deux niveaux : mattpocock `tdd` donne la méthode (boucle rouge-vert), ECC `tdd-guide` l'agent qui l'applique, `tdd-workflow` la variante générale (complément, pas doublon), `springboot-tdd` reste propre à Spring. Politique de couverture : voir C1.",
+ "verrous": {
+  "motifs": [
+   {
+    "motif": "^ecc:skill:(.*x402|ito-.*)$",
+    "raison": "x402/ito : paiement ou calcul facturé, verrouillé sans exception (CDC §7.7)"
+   }
+  ],
+  "valides": {
+   "ecc:skill:fal-ai-media": "budget 0 : génération média via fal.ai (clé et crédits payants), déverrouillable par l'utilisateur dans son profil",
+   "ecc:skill:videodb": "budget 0 : SDK VideoDB, clé VIDEO_DB_API_KEY et crédits facturés, déverrouillable par l'utilisateur",
+   "ecc:skill:nutrient-document-processing": "budget 0 : API Nutrient (NUTRIENT_API_KEY, crédits facturés), déverrouillable par l'utilisateur",
+   "ecc:skill:exa-search": "budget 0 : recherche Exa (EXA_API_KEY, facturée à la requête), déverrouillable par l'utilisateur",
+   "ecc:skill:x-api": "budget 0 : API X (jetons développeur, niveaux payants), déverrouillable par l'utilisateur",
+   "ecc:skill:lead-intelligence": "budget 0 : exige les jetons de l'API X (payante) et publie vers l'extérieur, déverrouillable par l'utilisateur",
+   "ecc:skill:social-publisher": "budget 0 : service tiers SocialClaw (SC_API_KEY) qui publie en public ; publication = accord explicite, déverrouillable par l'utilisateur",
+   "ecc:skill:mailtrap-email-integration": "budget 0 : API Mailtrap (MAILTRAP_API_TOKEN, envoi d'e-mails facturé par quota), déverrouillable par l'utilisateur",
+   "ecc:skill:ui-to-vue": "budget 0 : modèles Alibaba DashScope (DASHSCOPE_API_KEY, tokens facturés), déverrouillable par l'utilisateur",
+   "ecc:skill:security-scan": "budget 0 : le scan appelle l'API Anthropic (ANTHROPIC_API_KEY, tokens facturés), déverrouillable par l'utilisateur",
+   "ecc:skill:prediction-market-risk-review": "ito : exige ITO_API_KEY (calcul facturé) ; marchés de prédiction, aucune exécution financière"
+  },
+  "refuses": {
+   "ecc:agent:database-reviewer": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:agent:docs-lookup": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:agent:e2e-runner": "option --yes seulement ; le mode par défaut n'en exige pas",
+   "ecc:agent:flutter-reviewer": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:agent:planner": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:command:cost-report": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:command:jira": "jeton du compte Jira déjà détenu par l'utilisateur, aucune facturation par le skill",
+   "ecc:command:ui-canvas": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:benchmark-methodology": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:benchmark-optimization-loop": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:carrier-relationship-management": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:codehealth-mcp": "mode autonome sans compte CodeScene payant (dit dans le skill) ; jeton personnel gratuit",
+   "ecc:skill:competitive-platform-analysis": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:contract-first": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:cost-tracking": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:customer-billing-ops": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:customs-trade-compliance": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:data-scraper-agent": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:defi-amm-security": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:design-system": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:django-patterns": "clé de configuration de l'application Django de l'utilisateur, pas un service facturé",
+   "ecc:skill:django-security": "clé de configuration de l'application Django de l'utilisateur, pas un service facturé",
+   "ecc:skill:django-verification": "clé de configuration de l'application Django de l'utilisateur, pas un service facturé",
+   "ecc:skill:ecc-recipes": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:ecc-tools-cost-audit": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:energy-procurement": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:finance-billing-ops": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:flutter-dart-code-review": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:frontend-slides": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:gateguard": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:investor-materials": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:jira-integration": "jeton du compte Jira déjà détenu par l'utilisateur, aucune facturation par le skill",
+   "ecc:skill:laravel-plugin-discovery": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:market-research": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:netmiko-ssh-automation": "mot de passe d'équipement réseau local de l'utilisateur",
+   "ecc:skill:osint-investigation": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:plankton-code-quality": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:product-lens": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:production-audit": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:prompt-caching-strategy": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:quarkus-security": "secret OIDC de l'application de l'utilisateur, pas un service facturé",
+   "ecc:skill:quarkus-verification": "jeton SonarQube de l'utilisateur, pas facturé par le skill",
+   "ecc:skill:react-patterns": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:redis-patterns": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:repo-scan": "variable shell locale (suffixe de dossier temporaire), pas une clé",
+   "ecc:skill:returns-reverse-logistics": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:scientific-db-openalex-database": "OpenAlex : clé gratuite",
+   "ecc:skill:scientific-db-uspto-database": "PatentsView / USPTO : clés gratuites",
+   "ecc:skill:security-review": "simple exemple de code à relire (mauvaise pratique montrée), aucune API exigée",
+   "ecc:skill:short-video-distribution": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:taste-application": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:taste-distillation": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:tinystruct-patterns": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:ui-canvas": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ecc:skill:workspace-surface-audit": "noms de clés listés pour audit, aucune clé exigée",
+   "mattpocock:skill:pr": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ponytail:skill:ponytail-audit": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)",
+   "ponytail:skill:ponytail-review": "mot de tarification ou de crédit rencontré dans le texte, aucune clé ni service facturé exigé (relu)"
+  }
+ }
+}

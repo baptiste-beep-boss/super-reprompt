@@ -1,0 +1,31 @@
+{
+ "lot": "L5",
+ "date": "2026-11-23",
+ "sous_agents": 1,
+ "modele": "haiku",
+ "role": "agents/sr-exec-haiku.md",
+ "note": "Role charge par chemin dans un sous-agent general-purpose Haiku (sr-exec-haiku non enregistre dans cette session : outils non restreints par le harnais, restriction portee par le texte du role). Projet factice hors depot.",
+ "executions": [
+  {
+   "element": "ecc:agent:python-reviewer",
+   "resultat": "ok",
+   "preuve": "exec1.md ecrit : eval et fichier sans with releves ; Bash du role indisponible (ruff/mypy non lances)",
+   "manque": "python-patterns non lu"
+  },
+  {
+   "element": "mattpocock:skill:tdd",
+   "resultat": "ok",
+   "preuve": "test_app.py ecrit : test rouge unittest sur average([]) ; tests.md et mocking.md du skill lus",
+   "manque": "GLOSSARY.md optionnel absent"
+  },
+  {
+   "element": "ponytail:skill:ponytail-review",
+   "resultat": "ok",
+   "preuve": "exec3.md ecrit : revue selon le skill (verdict : corriger 2 points)",
+   "manque": "aucun"
+  }
+ ],
+ "tokens_total": 167970,
+ "appels_outils": 11,
+ "duree_ms": 137121
+}
