@@ -1,0 +1,314 @@
+[
+ {
+  "crochets": {
+   "langage": "python",
+   "acte": "tests",
+   "livrable": "suite de tests"
+  },
+  "attendu": [
+   "ecc:skill:python-testing",
+   "ecc:skill:tdd-workflow",
+   "mattpocock:skill:tdd"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "go",
+   "acte": "test"
+  },
+  "attendu": [
+   "ecc:skill:golang-testing"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "rust",
+   "acte": "test"
+  },
+  "attendu": [
+   "ecc:skill:rust-testing"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "kotlin",
+   "acte": "test"
+  },
+  "attendu": [
+   "ecc:skill:kotlin-testing"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "react",
+   "acte": "optimiser",
+   "livrable": "performance"
+  },
+  "attendu": [
+   "ecc:skill:react-performance"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "django",
+   "acte": "audit",
+   "livrable": "sécurité"
+  },
+  "attendu": [
+   "ecc:skill:django-security",
+   "ecc:skill:django-verification"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "postgres",
+   "acte": "concevoir",
+   "livrable": "schéma"
+  },
+  "attendu": [
+   "ecc:skill:postgres-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "docker",
+   "acte": "déployer"
+  },
+  "attendu": [
+   "ecc:skill:docker-patterns",
+   "ecc:skill:deployment-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "kubernetes",
+   "acte": "déployer"
+  },
+  "attendu": [
+   "ecc:skill:kubernetes-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "e2e",
+   "acte": "tester",
+   "livrable": "navigateur"
+  },
+  "attendu": [
+   "ecc:skill:e2e-testing",
+   "ecc:skill:browser-qa"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "security",
+   "acte": "review",
+   "livrable": "code"
+  },
+  "attendu": [
+   "ecc:skill:security-review",
+   "ecc:skill:security-scan"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "api",
+   "acte": "design"
+  },
+  "attendu": [
+   "ecc:skill:api-design"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "database",
+   "acte": "migration"
+  },
+  "attendu": [
+   "ecc:skill:database-migrations"
+  ]
+ },
+ {
+  "crochets": {
+   "acte": "documenter",
+   "livrable": "decision architecture"
+  },
+  "attendu": [
+   "ecc:skill:architecture-decision-records",
+   "ecc:skill:context-and-decisions"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "literature",
+   "acte": "research",
+   "livrable": "synthèse"
+  },
+  "attendu": [
+   "ecc:skill:deep-research",
+   "ecc:skill:scientific-thinking-literature-review",
+   "mattpocock:skill:research",
+   "ecc:skill:research-ops"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "architecture",
+   "acte": "refactor",
+   "livrable": "codebase"
+  },
+  "attendu": [
+   "mattpocock:skill:improve-codebase-architecture",
+   "ecc:skill:hexagonal-architecture",
+   "mattpocock:skill:codebase-design"
+  ]
+ },
+ {
+  "crochets": {
+   "acte": "debug",
+   "livrable": "bug"
+  },
+  "attendu": [
+   "mattpocock:skill:diagnosing-bugs",
+   "ecc:skill:agent-introspection-debugging"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "git",
+   "acte": "commit",
+   "livrable": "workflow"
+  },
+  "attendu": [
+   "ecc:skill:git-workflow",
+   "ecc:skill:conventional-commit-review"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "frontend",
+   "acte": "design",
+   "livrable": "interface"
+  },
+  "attendu": [
+   "ecc:skill:frontend-design-direction",
+   "ecc:skill:frontend-patterns",
+   "ecc:skill:design-system"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "accessibilité",
+   "acte": "audit",
+   "livrable": "wcag"
+  },
+  "attendu": [
+   "ecc:skill:accessibility",
+   "ecc:skill:frontend-a11y"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "seo",
+   "acte": "audit"
+  },
+  "attendu": [
+   "ecc:skill:seo"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "video",
+   "acte": "créer",
+   "langage": "react"
+  },
+  "attendu": [
+   "ecc:skill:remotion-video-creation",
+   "ecc:skill:video-editing"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "mcp",
+   "acte": "construire",
+   "livrable": "serveur"
+  },
+  "attendu": [
+   "ecc:skill:mcp-server-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "typescript",
+   "acte": "patterns"
+  },
+  "attendu": [
+   "ecc:skill:typescript-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "swift",
+   "domaine": "ios",
+   "acte": "concurrency"
+  },
+  "attendu": [
+   "ecc:skill:swift-concurrency-6-2",
+   "ecc:skill:swiftui-patterns",
+   "ecc:skill:swift-actor-persistence"
+  ]
+ },
+ {
+  "crochets": {
+   "langage": "java",
+   "domaine": "spring",
+   "acte": "patterns"
+  },
+  "attendu": [
+   "ecc:skill:springboot-patterns",
+   "ecc:skill:springboot-tdd"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "redis",
+   "acte": "cache"
+  },
+  "attendu": [
+   "ecc:skill:redis-patterns"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "healthcare",
+   "acte": "compliance",
+   "livrable": "hipaa"
+  },
+  "attendu": [
+   "ecc:skill:hipaa-compliance",
+   "ecc:skill:healthcare-phi-compliance"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "benchmark",
+   "acte": "mesurer",
+   "livrable": "évaluation"
+  },
+  "attendu": [
+   "ecc:skill:benchmark",
+   "ecc:skill:benchmark-methodology",
+   "ecc:skill:eval-harness"
+  ]
+ },
+ {
+  "crochets": {
+   "domaine": "pull request",
+   "acte": "revue"
+  },
+  "attendu": [
+   "mattpocock:skill:code-review",
+   "mattpocock:skill:pr"
+  ]
+ }
+]
