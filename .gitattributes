@@ -2,3 +2,5 @@
 # Fichiers générés comparés octet par octet par les tests : fins de ligne Unix partout.
 plugins/super-reprompt/catalog/*.jsonl text eol=lf
 plugins/super-reprompt/catalog/*.json text eol=lf
+plugins/super-reprompt/tests/fixtures_eclaireur/*.json text eol=lf
+plugins/super-reprompt/tests/eclaireur_besoins.json text eol=lf
