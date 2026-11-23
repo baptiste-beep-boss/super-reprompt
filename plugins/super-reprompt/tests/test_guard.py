@@ -226,7 +226,7 @@ class Guard(unittest.TestCase):
         for tool, inp in items:
             r = e.hook(tool, inp)
             if r.returncode != 0:
-                fp.append((tool, json.dumps(inp)[:90], r.stderr.decode().strip()))
+                fp.append((tool, json.dumps(inp)[:90], r.stderr.decode("utf-8", "replace").strip()))
         print("\nA18 false positives %d/%d" % (len(fp), len(items)))
         for x in fp:
             print("   FP:", x)
