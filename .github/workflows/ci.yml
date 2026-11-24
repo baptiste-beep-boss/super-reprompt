@@ -31,5 +31,7 @@ jobs:
           python-version: "3.12"
       - name: Loading ceilings (criterion A2)
         run: python dev/measure_loading.py --check
+      - name: A24 bench files unchanged since frozen (the bench itself never runs in CI)
+        run: python dev/a24_manifest.py --check
       - name: Unit tests and invariants I1-I7 (criteria A1, A21)
         run: python -m unittest discover -s tests

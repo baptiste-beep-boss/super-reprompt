@@ -54,7 +54,8 @@ claude plugin install super-reprompt@super-reprompt
 Then just describe your project. The skill fires on its own when the request deserves framing, or you can call
 it explicitly with `/super-reprompt:super-reprompt`.
 
-No API key, no account, no service. Python 3.8+ for the scripts; the plugin degrades gracefully without it.
+No API key required, no account required, nothing paid. A free AI provider can be connected by you, optionally, for
+the relay (below). Python 3.8+ for the scripts; the plugin degrades gracefully without it.
 
 ## Before / after
 
@@ -225,7 +226,39 @@ reference adds 1,086 tokens and is counted **separately**, only when the agent i
 
 During a **sealed** mission (`guard.py seal`), a `PreToolUse` hook blocks, with no token spent: edits to sealed tests, to the order or its criteria, to `SCELLE.json` / `settings.json` / `hooks.json`; `--no-verify` and `SUPER_REPROMPT_HOOKS=0`; writes outside the perimeter; recursive deletes, `reset --hard`, force pushes; any push or publication without a written approval (an *avenant* signed by you in your own terminal); reads of `.env` and key stores; secrets in files or commands; hosts that are not allow-listed; red data going to a relay; spending; financial execution; skill installs without a scan; `except: pass` and skipped tests added to make a run pass. Outside a sealed mission the hook exits at once and says nothing.
 
-**A hook is not a sandbox.** It reads the command text, so a script that writes elsewhere, or an obfuscated command, can pass. What it cannot parse is **detected after the fact** (`guard.py post` compares git state and test fingerprints to the seal; `guard.py drift` flags files with no requirement, requirements with no task, weakened criteria, budget overruns, and test output written without any test run). Detection is not blocking. Inside a mission the hook fails closed on corrupted input; if no Python interpreter is found, the hook cannot run at all and does not block.
+**A hook is not a sandbox** (« un hook n'est pas un bac à sable »). It reads the command text, so a script that writes elsewhere, or an obfuscated command, can pass. What it cannot parse is **detected after the fact** (`guard.py post` compares git state and test fingerprints to the seal; `guard.py drift` flags files with no requirement, requirements with no task, weakened criteria, budget overruns, and test output written without any test run). Detection is not blocking. Inside a mission the hook fails closed on corrupted input; if no Python interpreter is found, the hook cannot run at all and does not block.
+
+## New in v3: it frames, then it runs the mission
+
+v3 keeps the v2.5 framing and its silence on small requests, then drives the execution. Each piece is a script you can run
+and test on its own; none of them needs a key, an account or a paid service.
+
+| Module | What it does | Entry point |
+|---|---|---|
+| **Vigie** | seals the order, blocks firewalls by script, flags drift (above) | `scripts/guard.py` |
+| **Relais** | hands bounded, verifiable tasks (18 types, each with its own deterministic checker) to **free** AI providers; secrets and red data never leave; falls back to Haiku, then Sonnet, never in a loop | `net/relais.py` |
+| **Éclaireur** | finds the best skill for each task: your installed skills, then the bundled catalogue, then skills.sh (1 to 4 generic keywords, never project text); third-party skills are quarantined, scanned and need your approval | `scripts/eclaireur.py`, `scripts/skillscan.py` |
+| **Équipe** | the super-manager loop: script → relay → session → specialist → sub-manager, chosen by measured gates; per-phase budget (alert at 80 %, stop at 150 %); every agent has an explicit model | `scripts/manager.py`, `scripts/econ.py`, `agents/sr-*` |
+| **Mémoire** | direct access to an Obsidian vault (FTS5 search, journal, brief), no app or MCP needed | `scripts/vault.py` |
+| **Catalogue** | ECC, mattpocock/skills and ponytail, pinned and hashed, loaded only on demand | `catalog/`, `vendor/` |
+
+### Connecting a free provider (you, never an agent)
+
+Nothing is connected by default: the relay then delegates nothing and falls back to Haiku. To connect a provider, type
+in **your own terminal** (the key is asked masked, tested with one real call, then kept by the OS key store: DPAPI on
+Windows, libsecret on Linux; anything else is refused):
+
+    python plugins/super-reprompt/net/relais.py connect groq
+    python plugins/super-reprompt/net/relais.py status
+
+The key is never an argument, an environment variable, a log line or a chat message, and it is bound to the host it was
+tested on. `providers.json` expires 30 days after its date: past that, the relay calls no one until the terms are re-read.
+
+### Checking v3 yourself
+
+    python plugins/super-reprompt/dev/accept.py          # A1-A24: green / red / not measured, with the proof command
+
+Nothing is green without being executed in that run. Criteria that cannot run on your machine say so.
 
 ## What ships in the plugin
 
@@ -257,9 +290,12 @@ capabilities and post-mission steps. It never waives the cost gate or the confir
 **How do I remove it?**
 
 ```bash
+python plugins/super-reprompt/scripts/uninstall.py --yes   # plugin state: logs, relay home and keys, vault index
 claude plugin uninstall super-reprompt
 claude plugin marketplace remove super-reprompt
 ```
+
+Your missions (`<project>/.super-reprompt/`) and your vault notes are yours: listed, never deleted.
 
 ## Contributing
 

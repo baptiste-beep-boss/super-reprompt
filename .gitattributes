@@ -4,3 +4,5 @@ plugins/super-reprompt/catalog/*.jsonl text eol=lf
 plugins/super-reprompt/catalog/*.json text eol=lf
 plugins/super-reprompt/tests/fixtures_eclaireur/*.json text eol=lf
 plugins/super-reprompt/tests/eclaireur_besoins.json text eol=lf
+# Banc A24 (lot L10) : fichiers figes et empreintes SHA-256, compares octet par octet.
+plugins/super-reprompt/evals/v3-a24/** text eol=lf
