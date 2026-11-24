@@ -96,11 +96,20 @@ def budget_status(spent, cap):
     return "arret" if r >= 1.5 else ("alerte" if r >= 0.8 else "ok")
 
 
-def spend(mdir, phase, poste, toks, estimated=False):
+def spend(mdir, phase, poste, toks, estimated=False, run_id=None):
+    """One spend line. With `run_id`, a replay (resume after a crash) writes nothing: -> False."""
     import contracts                                    # locked append (lot 1 V3.1): no interleaving between agents
     os.makedirs(mdir, exist_ok=True)
-    contracts.append_line(os.path.join(mdir, "econ.ndjson"),
-                          json.dumps({"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": int(toks), "estime": bool(estimated)}))
+    p = os.path.join(mdir, "econ.ndjson")
+    if run_id and os.path.isfile(p):
+        with open(p, encoding="utf-8") as f:
+            if any(('"run_id": "%s"' % run_id) in l for l in f):
+                return False
+    row = {"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": int(toks), "estime": bool(estimated)}
+    if run_id:
+        row["run_id"] = run_id
+    contracts.append_line(p, json.dumps(row))
+    return True
 
 
 def bilan(mdir, plan):

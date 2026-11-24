@@ -223,7 +223,7 @@ class Loop(unittest.TestCase):
         self.assertNotEqual(rc, 0)                                   # the proof command fails: the report is not believed
         self.assertIn("preuve ECHEC", so)
         st = {t["id"]: t["status"] for t in self.plan_now()["tasks"]}
-        self.assertEqual(st, {"T1": "done", "T2": "done", "T3": "echec"})
+        self.assertEqual(st, {"T1": "done", "T2": "done", "T3": "failed"})   # V3.1 lot 3 : statut canonique (contracts)
         with open(os.path.join(self.mdir, "events.ndjson"), encoding="utf-8") as f:
             kinds = [json.loads(l)["event_type"].split(".", 1)[1] for l in f if l.strip() and '"log.' in l]
         self.assertIn("vigie", kinds)

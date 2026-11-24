@@ -31,7 +31,7 @@ TRANSITIONS = {
     "running": ("review", "failed", "blocked", "cancelled"),
     "review": ("done", "failed", "running"),
     "blocked": ("ready", "cancelled", "skipped"),
-    "failed": ("ready", "cancelled", "skipped"),
+    "failed": ("ready", "blocked", "cancelled", "skipped"),       # blocked: attempts exhausted, a human decides
     "done": (), "cancelled": (), "skipped": (),
 }
 LEGACY_STATUS = {"todo": "ready", "echec": "failed"}
