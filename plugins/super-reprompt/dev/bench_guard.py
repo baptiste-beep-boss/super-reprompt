@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""A20: median latency of the real hook command `py -3 -I -S scripts/guard.py` (also reports the bare interpreter floor).
+"""A20: median latency of the real hook command from hooks.json (`sh hooks/run.sh guard.py --guard`, as Claude Code runs it),
+the direct `python -I -S guard.py` call, and the bare interpreter / shell floors, so the hook's own overhead is visible.
 Usage: py -3 dev/bench_guard.py [--n 60]   (standard library only, no network)"""
 import json
 import os
@@ -14,6 +15,7 @@ import importlib.util  # noqa: E402
 _spec = importlib.util.spec_from_file_location("tg", os.path.join(os.path.dirname(HERE), "tests", "test_guard.py"))
 tg = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tg)
+import test_launcher as tl  # noqa: E402
 
 
 def timed(cmd, data, cwd, env=None):
@@ -26,11 +28,11 @@ def main():
     n = int(sys.argv[sys.argv.index("--n") + 1]) if "--n" in sys.argv else 60
     e = tg.Env()
     try:
-        real = ["py", "-3", "-I", "-S", tg.GUARD]
+        real = [tl.SH, "-c", tl.hook_command("PreToolUse")] if tl.SH else ["py", "-3", "-I", "-S", tg.GUARD]
         direct = [sys.executable, "-I", "-S", tg.GUARD]
         mix = [tg.B(c) for c in tg.LEGIT_BASH] + [(t, i) for t, i in tg.LEGIT_TOOLS if "$SCRATCH" not in json.dumps(i)]
         payloads = [json.dumps({"tool_name": t, "tool_input": i, "cwd": e.root}).encode() for t, i in mix]
-        floor = [timed(["py", "-3", "-I", "-S", "-c", "pass"], b"", e.root) for _ in range(20)]
+        floor = [timed([tl.SH, "-c", '"$0" -I -S -c pass', sys.executable], b"", e.root) for _ in range(20)] if tl.SH else [timed(["py", "-3", "-I", "-S", "-c", "pass"], b"", e.root) for _ in range(20)]
         out_dir = os.path.dirname(e.top)
         outside = [timed(real, payloads[k % len(payloads)], out_dir) for k in range(20)]
         inside = [timed(real, payloads[k % len(payloads)], e.root) for k in range(n)]
@@ -41,11 +43,12 @@ def main():
         print("DIRECT interpreter floor (python.exe -I -S): " + f(dfloor))
         print("DIRECT hook inside a mission, mix:           " + f(dmix))
         print("  -> hook overhead above the floor: %.0f ms (median)" % (statistics.median(dmix) - statistics.median(dfloor)))
-        print("interpreter floor (py -3 -I -S -c pass): " + f(floor))
+        print("REAL floor (shell + python -I -S -c pass):  " + f(floor))
         print("hook outside a mission (I7, silent):       " + f(outside))
         print("hook inside a mission, harmless tool:      " + f(harmless))
         print("hook inside a mission, %d-action mix:      %s" % (len(mix), f(inside)))
         med = statistics.median(inside)
+        print("  -> real hook overhead above the real floor: %.0f ms (median)" % (med - statistics.median(floor)))
         print("A20 %s: median %.0f ms (limit 120 ms)" % ("OK" if med < 120 else "FAIL", med))
         return 0 if med < 120 else 1
     finally:

@@ -320,7 +320,10 @@ class TranscriptCounting(TmpCase):
         self.assertEqual(L.count_tool_calls(p)["counts"], {})
 
 
-@unittest.skipUnless(shutil.which("bash"), "bash not available")
+from test_launcher import SH as _POSIX_SH   # Git Bash on Windows, never the WSL bash of System32
+
+
+@unittest.skipUnless(_POSIX_SH, "no POSIX shell")
 class LauncherChain(TmpCase):
     """Runs the exact command string from hooks/hooks.json through bash (as Claude Code does in shell form)."""
 
@@ -334,7 +337,7 @@ class LauncherChain(TmpCase):
         env = dict(self.env)
         if path is not None:
             env["PATH"] = path
-        p = subprocess.run([shutil.which("bash"), "-c", cmd], input=stdin.encode("utf-8"), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=60)
+        p = subprocess.run([_POSIX_SH, "-c", cmd], input=stdin.encode("utf-8"), stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=env, timeout=60)
         return p.returncode, p.stdout.decode("utf-8", errors="replace")
 
     def test_chain_runs_a_working_launcher(self):
@@ -347,24 +350,22 @@ class LauncherChain(TmpCase):
 
     def test_chain_is_silent_and_exits_0_without_any_python(self):
         cmd = self.command_for("Stop", "hook_stop.py")
-        bashdir = os.path.dirname(shutil.which("bash"))
+        bashdir = os.path.dirname(_POSIX_SH)
         # PATH holds only bash's own folder when it has no python next to it; skip otherwise
         if any(os.path.exists(os.path.join(bashdir, n)) for n in ("python", "python3", "python.exe", "py.exe")):
             self.skipTest("a python sits next to bash")
         rc, out = self.run_bash(cmd, "{}", path=bashdir)
         self.assertEqual((rc, out), (0, ""))
 
-    def test_all_three_commands_have_the_fallback_chain_and_quoting(self):
+    def test_every_hook_goes_through_the_common_launcher(self):
         with open(os.path.join(ROOT, "hooks", "hooks.json"), encoding="utf-8") as f:
             hooks = json.load(f)["hooks"]
         for event, entries in hooks.items():
-            if event == "PreToolUse":      # L4 firewall: own launcher, fails closed (see test_guard.py)
-                continue
             cmd = entries[0]["hooks"][0]["command"]
-            self.assertIn("python3 \"${CLAUDE_PLUGIN_ROOT}/scripts/", cmd)
-            self.assertIn("|| py -3 \"${CLAUDE_PLUGIN_ROOT}/scripts/", cmd)
-            self.assertIn("|| python \"${CLAUDE_PLUGIN_ROOT}/scripts/", cmd)
-            self.assertTrue(cmd.rstrip().endswith("; exit 0"))
+            self.assertTrue(cmd.startswith('sh "${CLAUDE_PLUGIN_ROOT}/hooks/run.sh" '), cmd)
+            self.assertNotIn("python3 ", cmd)                    # no direct call: Store stubs are skipped by run.sh
+            if event == "PreToolUse":
+                self.assertTrue(cmd.endswith(" guard.py --guard"))
 
 
 if __name__ == "__main__":
