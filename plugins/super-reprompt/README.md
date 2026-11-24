@@ -66,11 +66,16 @@ The hooks never call a model and cost no usage by themselves. The skill and the 
 
 ## Uninstall
 
+    python scripts/uninstall.py          # lists what would go, removes nothing
+    python scripts/uninstall.py --yes    # removes the plugin state (tested: your home is left exactly as before, criterion A23)
     claude plugin uninstall super-reprompt
 
-Claude Code deletes the plugin files. The plugin's own data stays until you remove it:
+`uninstall.py --yes` removes the plugin's own state, and nothing else:
 
-- `~/.claude/super-reprompt/` - optional `profile.md`, `hook.log`, small cooldown files under `state/`. Delete the folder.
+- `~/.claude/super-reprompt/` - `profile.md`, `hook.log`, cooldown files, the relay home (ledger, breaker, the DPAPI key
+  files of any provider you connected) and the vault search index. On Linux it also clears the relay keys from libsecret.
+
+It never touches your data, which it only lists:
 - `<project>/.super-reprompt/` - one folder per mission (order, state, notes, report). Delete it when you no longer need it.
 
 ## Your profile (optional)

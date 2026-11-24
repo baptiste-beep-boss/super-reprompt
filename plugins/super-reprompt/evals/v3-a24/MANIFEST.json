@@ -1,0 +1,11 @@
+{
+ "fige_le": "2026-11-24",
+ "fichiers": {
+  "projets/difficile/ENONCE.md": "f5f0a25d5421793063e44fcbe3c4a0e20593a19e90479d4fe57a3783a3aee07c",
+  "projets/difficile/caches/test_planif_cache.py": "fdda1d4bae94362e77091337366db768805bcfef2e741ba6544e183b6719fc0a",
+  "projets/facile/ENONCE.md": "18acd529c57a2db5c02e5dc8af2095200ca181d55db579cf1fc118df1d7d5a9b",
+  "projets/facile/caches/test_duree_cache.py": "e659e5396eddc841018c971429c8caa6a95c4ea678253a6e347bf8308d5f306c",
+  "projets/moyen/ENONCE.md": "3d5bb255d7ce649e12e8aee159192b12b61e277fad61069f309feb02e6a0f5fb",
+  "projets/moyen/caches/test_dedup_cache.py": "ded49a0d835def40f66b14c8b75384acff20505ce3a198d722a980ca8601715c"
+ }
+}
