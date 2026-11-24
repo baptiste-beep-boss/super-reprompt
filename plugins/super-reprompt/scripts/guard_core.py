@@ -141,7 +141,7 @@ def is_secret_store(p):
     if b.startswith(".env") and not b.endswith((".example", ".sample", ".template", ".dist")):
         return True
     if b in ("credentials", "credentials.json", ".credentials.json", ".netrc", "_netrc", ".git-credentials", ".npmrc", ".pypirc", "id_rsa",
-             "id_ed25519", "id_ecdsa", "id_dsa", "secrets.json", "secrets.yaml", "secrets.yml") or b.endswith((".pem", ".key", ".pfx", ".p12", ".kdbx")):
+             "id_ed25519", "id_ecdsa", "id_dsa", "secrets.json", "secrets.yaml", "secrets.yml") or b.endswith((".pem", ".key", ".pfx", ".p12", ".kdbx", ".dpapi")):
         return True
     n = p.replace("\\", "/").lower()
     return "/.ssh/" in n or "/.aws/" in n or "/.gnupg/" in n or "/.config/gh/hosts" in n
@@ -325,8 +325,7 @@ def secret_in(text):
         return None
     import re
     for p in SECRET_PATTERNS:
-        m = re.search(p, text)
-        if m:
+        for m in re.finditer(p, text):     # every occurrence: a placeholder first must not hide a real secret further down
             s = m.group(0).lower()
             if any(x in s for x in PLACEHOLDER):
                 continue
