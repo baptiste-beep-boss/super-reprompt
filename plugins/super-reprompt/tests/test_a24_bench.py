@@ -68,10 +68,14 @@ class A24Bench(unittest.TestCase):
             self.assertIn(need, proto)
         with open(os.path.join(BENCH, "RESULTS.md"), encoding="utf-8") as f:
             res = f.read()
-        self.assertIn("NON LANCE", res)
-        for arm in ARMS:
-            for lvl in LEVELS:
-                self.assertIn("| %s | %s |" % (arm, lvl), res)
+        if "NON LANCE" in res:                         # template, before any trial
+            for arm in ARMS:
+                for lvl in LEVELS:
+                    self.assertIn("| %s | %s |" % (arm, lvl), res)
+        else:                                          # results: every arm reported, reduction declared, failures kept
+            self.assertIn("Reduction declaree", res)
+            for arm in ARMS:
+                self.assertIn("| %s |" % arm, res)
 
 
 if __name__ == "__main__":

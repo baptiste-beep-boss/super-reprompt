@@ -123,7 +123,8 @@ def tempdirs():
         v = os.environ.get(k)
         if v:
             out.append(nc(v))
-    out.append(nc("/tmp"))
+    if not out:                       # /tmp only when no temp dir is declared (CI Linux: the project itself lives in /tmp)
+        out.append(nc("/tmp"))
     return out
 
 
