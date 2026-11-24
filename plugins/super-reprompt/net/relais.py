@@ -811,7 +811,7 @@ def run_plan(args):
     led = Ledger(ctx.ledger_path)
     brk = ctx.breaker()
     for tk in plan.get("tasks", []):
-        tid, typ, text = str(tk.get("id", "?")), tk.get("type"), str(tk.get("text", ""))
+        tid, typ, text = str(tk.get("id", "?")), tk.get("type"), str(tk.get("text") or tk.get("titre") or "")
         if typ not in tasks()["types"]:
             lines.append("%s garde : type non delegable" % tid)
             continue
@@ -839,6 +839,8 @@ def run_plan(args):
         route = "%s/%s (score %.2f)" % (r[0][1]["id"], r[0][2]["id"], r[0][0][0]) if r else "repli haiku (aucun fournisseur admissible)"
         lines.append("%s delegue %s -> %s ; %s" % (tid, typ, route, uwhy))
     led.close()
+    if getattr(args, "json", False):         # L8: econ.py reads this verdict instead of recomputing the gates
+        return json.dumps({l.split(" ", 2)[0]: l.split(" ", 2)[1] for l in lines[1:]}, ensure_ascii=False)
     return "\n".join(lines)
 
 
@@ -992,6 +994,7 @@ def build_parser():
     common(s)
     s = sub.add_parser("plan")
     s.add_argument("plan")
+    s.add_argument("--json", action="store_true", help="{tache: delegue|garde}, lu par scripts/econ.py")
     common(s)
     s = sub.add_parser("status")
     s.add_argument("--providers", help=argparse.SUPPRESS)
