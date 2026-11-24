@@ -9,7 +9,7 @@ script="$1"; mode="$2"
 case "$0" in */*) here="${0%/*}" ;; *) here=. ;; esac
 root="$here/.."
 target="$root/scripts/$script"
-cache="${SR_HOME:-$HOME/.claude/super-reprompt}/python-path"
+cache="${SR_HOME:-${SUPER_REPROMPT_HOME:-$HOME/.claude/super-reprompt}}/python-path"
 
 usable() {
   case "$1" in ""|*WindowsApps*) return 1 ;; esac

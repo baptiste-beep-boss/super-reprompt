@@ -59,7 +59,7 @@ class RealLauncher(unittest.TestCase):
         shutil.rmtree(self.fake, ignore_errors=True)
 
     def run_hook(self, event, payload, path=None):
-        env = dict(os.environ, SR_HOME=self.home, TEMP=self.e.scratch, TMP=self.e.scratch, TMPDIR=self.e.scratch)
+        env = dict(os.environ, SR_HOME=self.home, SUPER_REPROMPT_HOME=self.home, TEMP=self.e.scratch, TMP=self.e.scratch, TMPDIR=self.e.scratch)
         if path is not None:
             env["PATH"] = path
         return subprocess.run([SH, "-c", hook_command(event)], input=json.dumps(payload).encode("utf-8"), cwd=self.e.root,

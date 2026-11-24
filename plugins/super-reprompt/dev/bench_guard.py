@@ -15,7 +15,9 @@ import importlib.util  # noqa: E402
 _spec = importlib.util.spec_from_file_location("tg", os.path.join(os.path.dirname(HERE), "tests", "test_guard.py"))
 tg = importlib.util.module_from_spec(_spec)
 _spec.loader.exec_module(tg)
-import test_launcher as tl  # noqa: E402
+_spec2 = importlib.util.spec_from_file_location("tl", os.path.join(os.path.dirname(HERE), "tests", "test_launcher.py"))
+tl = importlib.util.module_from_spec(_spec2)
+_spec2.loader.exec_module(tl)
 
 
 def timed(cmd, data, cwd, env=None):
