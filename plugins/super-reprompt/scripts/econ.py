@@ -142,6 +142,10 @@ def brief(t, ctx):
         "Critere : %s ; preuve : `%s`" % (t.get("critere", "la commande de preuve sort en 0"), " ".join(t.get("preuve", [])) if isinstance(t.get("preuve"), list) else t.get("preuve", "")),
         "Quota de delegation : passe d'abord `relais plan` ; tout ce que tu gardes porte une raison.",
     ]
+    caps = [c for c in t.get("capabilities") or [] if isinstance(c, dict) and c.get("id")]
+    if caps:                                   # lot 4 V3.1: only the retained capabilities, by id; read on demand, nothing else
+        lines.append("Capacites retenues par l'Eclaireur (lis seulement celles-ci, a la demande) : %s"
+                     % ", ".join("%s [%s]" % (c["id"], c.get("type", "?")) for c in caps[:6]))
     if t.get("ecrit_code"):
         lines.append("Mode ponytail full : lis %s et applique-le (moins de lignes, rien d'inutile)." % PONYTAIL)
     lines += [

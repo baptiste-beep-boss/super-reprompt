@@ -25,7 +25,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import contracts as C  # noqa: E402
 
-STRUCT_KEYS = ("title", "deps", "covers", "files", "acceptance_criteria", "preuve", "phase", "model", "effort",
+STRUCT_KEYS = ("title", "crochets", "deps", "covers", "files", "acceptance_criteria", "preuve", "phase", "model", "effort",
                "volume_tokens", "type", "mecanique", "isolement", "regard_neuf", "domaine", "privacy_class", "estimated_duration")
 STARTED = ("running", "review", "done", "failed", "blocked")
 
@@ -53,6 +53,22 @@ def _resolve_proof(v, cmds, errs, tid):
         return v, None
     errs.append("%s : aucune commande de preuve (preuve absente et aucune commande V<n> dans STATE.verification)" % tid)
     return None, None
+
+
+def _capabilities(tasks, extra):
+    """P4 (lot 4 V3.1): one capability plan per task, all types, from the universal Scout. Deterministic (catalogue on
+    disk, no network): recompiling gives the same plan. The per-task context budget is explicit and measured."""
+    import catalog
+    import eclaireur
+    els = catalog.load_catalog()
+    worst = total = 0
+    for t in tasks:
+        r = eclaireur.capacites(t, els)
+        t["capabilities"] = [{"id": x["id"], "type": x["type"], "cout_tokens": x["cout_tokens"], "cout_source": x["cout_source"]}
+                             for x in r["retenues"]]
+        worst, total = max(worst, r["contexte_tokens"]), total + r["contexte_tokens"]
+    extra["context_budget"] = {"tokens": worst, "budget": eclaireur.BUDGET_CONTEXTE, "total": total,
+                               "unite": "tokens de capacites chargees par tache (max sur les taches)", "source": "mesure (taille des fichiers)"}
 
 
 def build(state, order_sha):
@@ -99,12 +115,14 @@ def build(state, order_sha):
     for t in tasks:
         t["status"] = "ready" if not t["deps"] else "proposed"
         t["attempt"] = 1
+    _capabilities(tasks, plan_extra := {})
     covered = {c for t in tasks for c in t.get("covers", [])}
     for rid in reqs + [str(c["id"]) for c in crits]:
         if rid not in covered:
             errs.append("%s couvert par aucune tache" % rid)
     plan = {"schema": C.SCHEMA_VERSIONS["plan"], "slug": state.get("slug"), "source_order_hash": order_sha,
             "compiled_at": C.now_utc(), "tasks": tasks}
+    plan.update(plan_extra)
     if isinstance(state.get("phases"), dict):
         plan["phases"] = state["phases"]
     if isinstance(state.get("interdits"), list):

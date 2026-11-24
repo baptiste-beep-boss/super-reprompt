@@ -124,8 +124,8 @@ def cercle1(dirs):
     return out
 
 
-def cercle2(els):
-    return [_cand(e) for e in els if e["type"] in TYPES and e["statut"] not in EXCLUS and not e.get("verrou") and not e.get("doublon_de")]
+def cercle2(els, types=TYPES):
+    return [_cand(e) for e in els if e["type"] in types and e["statut"] not in EXCLUS and not e.get("verrou") and not e.get("doublon_de")]
 
 
 def cercle3(items, kws):
@@ -206,12 +206,15 @@ def noter(c, kst, fts, preuves, noms_installes):
     return round(max(0.0, min(1.0, s)), 4), {k: round(v, 3) for k, v in d.items()}
 
 
-def scout(task, els, installed_dirs=None, remote=None, preuves=None, seuil=SEUIL, n=5):
-    """Classement pour UNE tache. `remote(kws) -> [{id, nom, source, installs}]` n'est appele que sous le seuil et si kws est non vide."""
+def scout(task, els, installed_dirs=None, remote=None, preuves=None, seuil=SEUIL, n=5, types=TYPES):
+    """Classement pour UNE tache. `remote(kws) -> [{id, nom, source, installs}]` n'est appele que sous le seuil et si kws est non vide.
+    `types` : skills par defaut (A19) ; l'Eclaireur universel (capacites) interroge chaque type a part."""
     cr = crochets(task)
     kws = mots_cles(cr)
     kst = [stem(k) for k in kws]
-    c1, c2 = cercle1(installed_dirs), cercle2(els)
+    c1, c2 = (cercle1(installed_dirs) if "skill" in types else []), cercle2(els, types)
+    if "skill" not in types:
+        remote = None                                    # skills.sh only serves skills
     noms_inst = {c["nom"] for c in c1}
     fts = _fts(c1 + c2, kst)
 
@@ -242,6 +245,130 @@ def scout(task, els, installed_dirs=None, remote=None, preuves=None, seuil=SEUIL
 
 def scout_plan(plan, els, **kw):
     return [dict(tache=t.get("id"), **scout(t, els, **kw)) for t in plan.get("tasks", [])]
+
+
+# ----------------------------------------------------------------------------- Eclaireur universel (lot 4 V3.1)
+TOUS_TYPES = ("skill", "agent", "commande", "hook", "règle", "script", "schéma")
+SEUIL_TYPE = 0.5          # point de depart, non calibre (n = 0) : configurable, jamais presente comme optimal
+BUDGET_CONTEXTE = 6000    # tokens de capacites chargees par tache au plus (cercle 2 : detail) ; l'index n'est jamais charge
+
+
+def nom_norm(nom):
+    return re.sub(r"[^a-z0-9]", "", (nom or "").lower().replace("reviewer", "review").replace("-review", "review"))
+
+
+def _fichier(e):
+    p = os.path.join(C.VENDOR, e["chemin"])
+    if os.path.isdir(p):
+        p = os.path.join(p, "SKILL.md")
+    return p
+
+
+def _sha_fichier(p):
+    import hashlib
+    with open(C.lp(p), "rb") as fh:
+        return hashlib.sha256(fh.read()).hexdigest()
+
+
+def integrite(e, els=None):
+    """-> (ok, raison). Compare le fichier vendor a l'empreinte du catalogue (elle-meme issue de LOCK.json). Une entree
+    sans fichier propre (`conteneur#id`, hooks de hooks.json) : conteneur verifie contre son element, puis presence de
+    l'entree et de son empreinte dans hooks.metadata.json."""
+    import hashlib
+    if "#" in e.get("chemin", ""):
+        cont, hid = e["chemin"].split("#", 1)
+        parent = next((x for x in (els or []) if x["id"] == e.get("partie_de")), None)
+        cp = os.path.join(C.VENDOR, cont)
+        if not os.path.isfile(C.lp(cp)):
+            return False, "integrite : conteneur absent (%s)" % cont
+        if parent is not None and parent.get("sha") and _sha_fichier(cp) != parent["sha"]:
+            return False, "integrite : conteneur %s modifie" % cont
+        meta = os.path.join(os.path.dirname(cp), "hooks.metadata.json")
+        try:
+            with open(C.lp(meta), encoding="utf-8") as fh:
+                ents = [x for v in json.load(fh)["entries"].values() for x in v]
+        except (OSError, ValueError, KeyError):
+            return False, "integrite : metadonnees illisibles"
+        if not any(x.get("id") == hid and (not e.get("sha") or x.get("fingerprint") == e["sha"]) for x in ents):
+            return False, "integrite : entree %s absente ou empreinte differente" % hid
+        return True, "integrite verifiee (conteneur + empreinte de l'entree)"
+    fichiers = [f for f in e.get("fichiers") or [] if isinstance(f, str)]
+    if len(fichiers) > 1:                         # multi-file unit: same composite digest as catalog.sha_of
+        try:
+            h = C.sha_of(fichiers, {f: _sha_fichier(os.path.join(C.VENDOR, f)) for f in fichiers})
+        except OSError:
+            return False, "integrite : fichier absent dans %s" % e["chemin"]
+        if e.get("sha") and h != e["sha"]:
+            return False, "integrite : empreinte composite differente du catalogue (%s...)" % h[:12]
+        return True, "integrite verifiee (%d fichiers)" % len(fichiers)
+    p = _fichier(e)
+    if not os.path.isfile(C.lp(p)):
+        return False, "integrite : fichier absent (%s)" % e["chemin"]
+    with open(C.lp(p), "rb") as fh:
+        h = hashlib.sha256(fh.read()).hexdigest()
+    if e.get("sha") and h != e["sha"]:
+        return False, "integrite : empreinte differente du catalogue (%s...)" % h[:12]
+    return True, "integrite verifiee"
+
+
+def _cout_mesure(e):
+    if "#" in e.get("chemin", ""):                      # hook entry: runs as a script, loads no instructions in context
+        return int(e.get("coût_tokens") or 0), "estime"
+    p = _fichier(e)
+    try:
+        return int(math.ceil(os.path.getsize(C.lp(p)) / CHARS_PER_TOKEN)), "mesure"
+    except OSError:
+        return int(e.get("coût_tokens") or 0), "estime"
+
+
+def capacites(task, els, types=TOUS_TYPES, budget=BUDGET_CONTEXTE, par_type=1, seuil=SEUIL_TYPE):
+    """Plan de capacites d'une tache, tous types confondus. Cercle 0 : index (catalogue en memoire, jamais charge dans un
+    prompt) ; cercle 1 : shortlist par type ; cercle 2 : seules les retenues sont chargees, dans la limite du budget.
+    Chaque retenue et chaque ecart porte sa raison. Couts MESURES (taille du fichier) quand le fichier existe."""
+    by_id = {e["id"]: e for e in els}
+    cands = []
+    for ty in types:
+        r = scout(task, els, types=(ty,), n=max(3, par_type + 2))
+        for x in r["classement"]:
+            x = dict(x, type=ty)
+            cands.append(x)
+    cands.sort(key=lambda x: (-x["score"], x["id"]))
+    retenues, ecartees, pris, vus = [], [], {}, set()
+    total = 0
+    for x in cands:
+        e = by_id.get(x["id"])
+        base = {"id": x["id"], "type": x["type"], "nom": x["nom"], "score": x["score"]}
+        if x["score"] < seuil:
+            ecartees.append(dict(base, raison="sous le seuil %.2f (adequation %.2f)" % (seuil, x["details"]["adequation"])))
+            continue
+        if pris.get(x["type"], 0) >= par_type:
+            ecartees.append(dict(base, raison="deja %d capacite(s) de type %s" % (par_type, x["type"])))
+            continue
+        if nom_norm(x["nom"]) in vus:
+            ecartees.append(dict(base, raison="redondante avec une capacite deja retenue (meme nom)"))
+            continue
+        if e is not None:
+            ok, why = integrite(e, els)
+            if not ok:
+                ecartees.append(dict(base, raison=why))
+                continue
+            cout, src = _cout_mesure(e)
+        else:
+            cout, src = 0, "estime"
+        if total + cout > budget:
+            ecartees.append(dict(base, raison="budget de contexte : %d + %d > %d tokens" % (total, cout, budget)))
+            continue
+        total += cout
+        pris[x["type"]] = pris.get(x["type"], 0) + 1
+        vus.add(nom_norm(x["nom"]))
+        retenues.append(dict(base, cout_tokens=cout, cout_source=src,
+                             raison="score %.2f (adequation %.2f, preuve %.2f) ; integrite verifiee" % (x["score"], x["details"]["adequation"], x["details"]["preuve"])))
+    return {"tache": task.get("id"), "mots_cles": mots_cles(crochets(task)), "retenues": retenues, "ecartees": ecartees,
+            "contexte_tokens": total, "budget": budget}
+
+
+def capacites_plan(plan, els, **kw):
+    return [capacites(t, els, **kw) for t in plan.get("tasks", [])]
 
 
 # ----------------------------------------------------------------------------- adaptation
@@ -351,6 +478,17 @@ def main(argv):
             print("%s | mots-cles: %s | meilleur %.2f%s" % (r["tache"], " ".join(r["mots_cles"]) or "-", r["meilleur"], "" if r["meilleur"] >= SEUIL else " (sous le seuil : 3e cercle via net/scout.py)"))
             for x in r["classement"][:3]:
                 print("   %.2f c%d %s" % (x["score"], x["cercle"], x["id"]))
+        return 0
+    if len(argv) >= 2 and argv[0] == "capacites":
+        bud = int(argv[argv.index("--budget") + 1]) if "--budget" in argv else BUDGET_CONTEXTE
+        with open(argv[1], encoding="utf-8") as fh:
+            plan = json.load(fh)
+        for r in capacites_plan(plan, C.load_catalog(), budget=bud):
+            print("%s | mots-cles: %s | contexte %d/%d tokens" % (r["tache"], " ".join(r["mots_cles"]) or "-", r["contexte_tokens"], r["budget"]))
+            for x in r["retenues"]:
+                print("   + %-8s %s (%d tokens %s) : %s" % (x["type"], x["id"], x["cout_tokens"], x["cout_source"], x["raison"]))
+            for x in r["ecartees"][:5]:
+                print("   - %-8s %s : %s" % (x["type"], x["id"], x["raison"]))
         return 0
     if len(argv) >= 3 and argv[0] == "adapter":
         mots = [a for a in argv[2:] if not a.startswith("--")]

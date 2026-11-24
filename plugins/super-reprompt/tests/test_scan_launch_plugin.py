@@ -248,7 +248,7 @@ class PluginFiles(unittest.TestCase):
         allowed = {"argparse", "copy", "shlex", "hashlib", "json", "os", "re", "shutil", "subprocess", "sys", "time", "unicodedata", "pathlib", "_lib",
                    "validate_order", "glob", "tempfile", "unittest",
                    "sqlite3", "_sqlite3", "zlib",
-                   "fnmatch", "_json", "guard_core", "math", "catalog", "econ", "datetime", "contracts", "compile_plan"}   # V3.1 lot 1 : contracts.py (schemas, ecriture atomique, journal unique ; local, sans reseau)
+                   "fnmatch", "_json", "guard_core", "math", "catalog", "econ", "datetime", "contracts", "compile_plan", "eclaireur"}   # V3.1 lot 1 : contracts.py (schemas, ecriture atomique, journal unique ; local, sans reseau)
                      # L9 : budget.py (datetime, dates de reinitialisation des fenetres) ; L8 : manager.py importe econ.py (local, sans reseau) ; L7 : eclaireur.py (math, catalog) ; L3 : vault.py (index FTS5, nom de base) - bibliotheque standard ; L4 : guard.py (fnmatch pour PLAN.json, _json = scanner C du chemin chaud sans import json/re, PREUVES.md preuve 4)
         net = re.compile(r"(?m)^\s*(?:import|from)\s+(socket|urllib|http|requests|ftplib|smtplib|ssl|xmlrpc)\b")
         for p in glob.glob(os.path.join(SCRIPTS, "*.py")):

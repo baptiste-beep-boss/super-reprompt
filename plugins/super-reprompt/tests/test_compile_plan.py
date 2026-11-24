@@ -94,7 +94,7 @@ class Compile(TmpCase):
         self.make_mission()
         plan, _ = CP.compile_plan(self.project, "demo-mission")
         a = C.plan_structure_sha(plan)
-        plan["tasks"][0].update(status="done", attempt=3, receipt="r1", updated_at="2026-11-24T00:00:00Z")
+        plan["tasks"][0].update(status="done", attempt=3, receipt="r1", updated_at="2026-11-24T00:00:00Z", execution_mode="session")
         self.assertEqual(C.plan_structure_sha(plan), a)
         plan["tasks"][0]["deps"] = ["T-VERIF"]
         self.assertNotEqual(C.plan_structure_sha(plan), a)

@@ -342,7 +342,7 @@ def check(kind, obj, strict=False):
     return obj
 
 
-PROGRESS_KEYS = ("status", "attempt", "receipt", "updated_at", "owner", "started_at", "finished_at")
+PROGRESS_KEYS = ("status", "attempt", "receipt", "updated_at", "owner", "started_at", "finished_at", "execution_mode")
 
 
 def plan_structure_sha(plan):
