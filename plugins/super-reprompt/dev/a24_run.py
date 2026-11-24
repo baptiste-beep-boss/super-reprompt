@@ -87,6 +87,7 @@ def main():
     ap.add_argument("--timeout", type=int, default=1800)
     ap.add_argument("--dry-run", action="store_true")
     a = ap.parse_args()
+    a.claude = shutil.which(a.claude) or a.claude      # Windows : claude.cmd
     arms = a.arms.split(",")
     if "v25" in arms and not os.path.isdir(a.v25):
         ap.error("--v25 : dossier du plugin 2.5 introuvable")
