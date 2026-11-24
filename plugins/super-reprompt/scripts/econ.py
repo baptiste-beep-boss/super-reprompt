@@ -49,8 +49,41 @@ def model_id(name):
 
 
 # ------------------------------------------------------------------ gates
+# Cost model of the routing comparison (lot 6 V3.1). HYPOTHESES, not measurements: label "estimated", confidence low (n = 0),
+# to be replaced by observed medians once missions have receipts with actual tokens (P10).
+BRIEF_TOKENS = 600          # BRIEF_MAX
+REPORT_TOKENS = 1500        # REPORT_MAX
+AGENT_BOOT = 8000           # system prompt + tools of a fresh sub-agent (order of magnitude, not measured here)
+SUBMGR_COORD = 4000         # coordination of a sub-manager on top of its specialists
+COST_SOURCE = "modele de cout declare dans econ.py (hypotheses, n = 0)"
+
+
+def alternatives(t, relais=None):
+    """The four ways compared before each dispatch. Tokens split between the main context (what the super-manager pays)
+    and the total (what the mission pays). Never presented as observed."""
+    vol = int(t.get("volume_tokens") or 0)
+    rel_ok = bool(t.get("type")) and (relais or {}).get(t["id"]) == "delegue"
+    base = {"label": "estimated", "confiance": "faible (n = 0)", "source": COST_SOURCE}
+    return [
+        dict(base, level="session", possible=True, tokens_contexte_principal=vol, tokens_total=vol),
+        dict(base, level="specialiste", possible=True, tokens_contexte_principal=BRIEF_TOKENS + REPORT_TOKENS,
+             tokens_total=vol + AGENT_BOOT + BRIEF_TOKENS + REPORT_TOKENS),
+        dict(base, level="sous-manager", possible=True, tokens_contexte_principal=BRIEF_TOKENS + REPORT_TOKENS,
+             tokens_total=vol + 2 * AGENT_BOOT + SUBMGR_COORD + 2 * (BRIEF_TOKENS + REPORT_TOKENS)),
+        dict(base, level="relais", possible=rel_ok, tokens_contexte_principal=BRIEF_TOKENS + REPORT_TOKENS,
+             tokens_total=BRIEF_TOKENS + REPORT_TOKENS, tokens_externes=vol,
+             raison_impossible=None if rel_ok else "portes du Relais non passees (type absent, verdict garde ou aucun fournisseur)"),
+    ]
+
+
 def decide(t, relais=None):
-    """-> {id, level, model, effort, reason}. relais: {task_id: 'delegue' | 'garde'} as written by `relais plan --json`."""
+    """-> {id, level, model, effort, reason, alternatives}. relais: {task_id: 'delegue' | 'garde'} as written by `relais plan --json`."""
+    d = _decide(t, relais)
+    d["alternatives"] = alternatives(t, relais)
+    return d
+
+
+def _decide(t, relais=None):
     tid, vol = t["id"], int(t.get("volume_tokens") or 0)
     out = {"id": tid, "model": None, "effort": None}
     if t.get("mecanique"):
@@ -96,33 +129,92 @@ def budget_status(spent, cap):
     return "arret" if r >= 1.5 else ("alerte" if r >= 0.8 else "ok")
 
 
-def spend(mdir, phase, poste, toks, estimated=False, run_id=None):
-    """One spend line. With `run_id`, a replay (resume after a crash) writes nothing: -> False."""
+LABELS = ("actual", "estimated", "projected", "unavailable")
+
+
+def spend(mdir, phase, poste, toks, estimated=False, run_id=None, label=None, source=None, model=None, provider=None,
+          cost=None, currency=None):
+    """One labelled spend line in the single ledger econ.ndjson. With `run_id`, a replay writes nothing: -> False.
+    `label` wins over the historical `estimated` flag; `unavailable` keeps tokens null (never invented)."""
     import contracts                                    # locked append (lot 1 V3.1): no interleaving between agents
+    label = label or ("estimated" if estimated else "actual")
+    if label not in LABELS:
+        raise EconError("etiquette %r inconnue (%s)" % (label, ", ".join(LABELS)))
     os.makedirs(mdir, exist_ok=True)
     p = os.path.join(mdir, "econ.ndjson")
     if run_id and os.path.isfile(p):
         with open(p, encoding="utf-8") as f:
             if any(('"run_id": "%s"' % run_id) in l for l in f):
                 return False
-    row = {"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": int(toks), "estime": bool(estimated)}
+    row = {"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": None if label == "unavailable" or toks is None else int(toks),
+           "label": label, "estime": label != "actual", "source": source or ("compteur declare par l'agent" if label == "actual" else "estimation"),
+           "model": model, "provider": provider, "cost": cost, "currency": currency, "periode_tarifaire": None}
     if run_id:
         row["run_id"] = run_id
     contracts.append_line(p, json.dumps(row))
+    progress(mdir)
     return True
+
+
+def ledger(mdir):
+    """All rows, historical ones normalised (`estime` -> label)."""
+    p = os.path.join(mdir, "econ.ndjson")
+    out = []
+    if os.path.isfile(p):
+        with open(p, encoding="utf-8") as f:
+            for l in f:
+                if not l.strip():
+                    continue
+                try:
+                    r = json.loads(l)
+                except ValueError:
+                    continue
+                r.setdefault("label", "estimated" if r.get("estime") else "actual")
+                out.append(r)
+    return out
+
+
+def rapport(mdir, plan=None, seal=None):
+    """Reproducible cost report. Totals per label, never summed across labels without saying so; mission budget from the
+    seal, phase budgets from the plan; `projected` = volume of the tasks not done yet (estimates of the framing)."""
+    rows = ledger(mdir)
+    tot = {k: sum(r["tokens"] or 0 for r in rows if r["label"] == k) for k in ("actual", "estimated")}
+    unav = sum(1 for r in rows if r["label"] == "unavailable")
+    proj = sum(int(t.get("volume_tokens") or 0) for t in (plan or {}).get("tasks", []) if t.get("status") not in ("done", "skipped", "cancelled"))
+    cap = ((seal or {}).get("budget") or {}).get("max_tokens") or None
+    used = tot["actual"] + tot["estimated"]
+    out = {"actual": tot["actual"], "estimated": tot["estimated"], "projected": proj, "unavailable": unav,
+           "mission": {"budget": cap, "consomme": dict(tot), "statut": budget_status(used, cap),
+                       "note": "statut calcule sur actual + estimated (%d + %d), deux grandeurs de nature differente" % (tot["actual"], tot["estimated"])},
+           "phases": {ph: {k: b[k] for k in ("total", "budget", "statut", "estime")} for ph, b in bilan(mdir, plan or {}).items()},
+           "postes": {}, "lignes": len(rows)}
+    for r in rows:
+        k = "%s/%s" % (r["poste"], r["label"])
+        out["postes"][k] = out["postes"].get(k, 0) + (r["tokens"] or 0)
+    return out
+
+
+def progress(mdir):
+    """PROGRESS.json is a PROJECTION of econ.ndjson (+ PLAN.json): the Vigie's budget guard reads it, nobody writes it by hand."""
+    import contracts
+    plan = contracts.read_json(os.path.join(mdir, "PLAN.json"), default=None) or {}
+    seal = contracts.read_json(os.path.join(mdir, "SCELLE.json"), default=None) or {}
+    r = rapport(mdir, plan, seal)
+    contracts.atomic_write_json(os.path.join(mdir, "PROGRESS.json"), {
+        "source": "econ.ndjson (projection, ecrite par econ.progress)", "tokens_used": r["actual"] + r["estimated"],
+        "detail": {"actual": r["actual"], "estimated": r["estimated"], "projected": r["projected"], "unavailable": r["unavailable"]},
+        "budget": r["mission"]["budget"], "statut": r["mission"]["statut"]})
+    return r
 
 
 def bilan(mdir, plan):
     res = {}
     p = os.path.join(mdir, "econ.ndjson")
-    rows = []
-    if os.path.isfile(p):
-        with open(p, encoding="utf-8") as f:
-            rows = [json.loads(l) for l in f if l.strip()]
+    rows = ledger(mdir) if os.path.isfile(p) else []
     for r in rows:
         b = res.setdefault(r["phase"], {"total": 0, "postes": {}, "estime": False})
-        b["total"] += r["tokens"]
-        b["postes"][r["poste"]] = b["postes"].get(r["poste"], 0) + r["tokens"]
+        b["total"] += r["tokens"] or 0
+        b["postes"][r["poste"]] = b["postes"].get(r["poste"], 0) + (r["tokens"] or 0)
         b["estime"] = b["estime"] or r.get("estime", False)
     for ph, b in res.items():
         cap = ((plan.get("phases") or {}).get(ph) or {}).get("budget_tokens")
@@ -195,7 +287,28 @@ def main(argv=None):
     s.add_argument("mdir")
     s = sub.add_parser("check-report")
     s.add_argument("fichier")
+    s = sub.add_parser("rapport", help="rapport de cout reproductible (actual / estimated / projected / unavailable)")
+    s.add_argument("mdir")
+    s.add_argument("--json", action="store_true")
     a = ap.parse_args(argv)
+    if a.cmd == "rapport":
+        import contracts
+        plan = contracts.read_json(os.path.join(a.mdir, "PLAN.json"), default=None) or {}
+        seal = contracts.read_json(os.path.join(a.mdir, "SCELLE.json"), default=None) or {}
+        r = rapport(a.mdir, plan, seal)
+        r["genere_le"] = contracts.now_utc()
+        if a.json:
+            print(json.dumps(r, ensure_ascii=False, sort_keys=True))
+            return 0
+        m = r["mission"]
+        print("actual %d | estimated %d | projected %d | unavailable %d ligne(s) - jamais additionnes sans le dire"
+              % (r["actual"], r["estimated"], r["projected"], r["unavailable"]))
+        print("mission : budget %s -> %s (%s)" % (m["budget"], m["statut"], m["note"]))
+        for ph, b in sorted(r["phases"].items()):
+            print("phase %s : %d / %s -> %s" % (ph, b["total"], b["budget"], b["statut"]))
+        for k, v in sorted(r["postes"].items()):
+            print("  %s : %d" % (k, v))
+        return 0
     try:
         if a.cmd == "decide":
             plan, rel = _load(a.plan), (_load(a.relais) if a.relais else {})

@@ -18,7 +18,7 @@ Boucle, a chaque tour :
    - specialiste : outil Agent, `subagent_type` sr-exec-haiku ou sr-exec-sonnet, **modele explicite** (celui que donne next), prompt = le brief ecrit, rien d'autre ;
    - sous-manager : outil Agent `sr-sous-manager`, seulement si next l'a propose.
 3. Ecris la remontee recue dans un fichier, puis `py -3 scripts/manager.py done T --report F --tokens N` (N = tokens reels de l'agent). La preuve est la commande de la tache, jamais le recit.
-4. Recommence jusqu'a « FIN ». `done` annonce lui-meme les jalons de la Vigie (25/50/75/100 %), `FIN DE PHASE` (lance sr-archiviste avec le brief indique) et `CLOTURE` (lance sr-synthese avec le brief indique, puis `econ.py bilan`). Rejouer `done` ne duplique rien.
+4. Recommence jusqu'a « FIN ». `done` annonce lui-meme les jalons de la Vigie (25/50/75/100 %), `FIN DE PHASE` (lance sr-archiviste avec le brief indique) et `CLOTURE` (lance sr-synthese avec le brief indique, puis `econ.py rapport <dossier de mission>` : actual, estimated, projected separes). Rejouer `done` ne duplique rien.
 
 Tu decides seul de tout ce qui est reversible. Tu n'interromps l'utilisateur que pour : argent, secret, publication ou push, suppression, changement de perimetre, depassement (ARRET budget), deuxieme derive (QUESTION de la Vigie), accord d'installation d'un skill tiers.
 

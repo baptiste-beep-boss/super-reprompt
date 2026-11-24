@@ -183,6 +183,8 @@ def cmd_spent(a, project):
     new = round(cur + k, 3)
     b["spent_est_k"] = int(new) if new == int(new) else new
     L.save_state(project, a.slug, st)
+    import econ                                     # single ledger (lot 6 V3.1): STATE.spent_est_k is kept as a projection
+    econ.spend(str(L.mission_dir(project, a.slug)), "mission", "session", int(round(k * 1000)), label="estimated", source="mission.py spent")
     cap = b.get("cap_k")
     print("spent_est_k=%s cap_k=%s" % (b["spent_est_k"], cap))
     if isinstance(cap, (int, float)) and b["spent_est_k"] > cap:

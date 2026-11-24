@@ -139,6 +139,18 @@ def cmd_next(a):
     except C.ContractError as e:
         print("REFUS : %s" % e)
         return 2
+    seal = C.read_json(os.path.join(mdir, "SCELLE.json"), default=None) or {}
+    rap = econ.rapport(mdir, plan, seal)                 # single budget (lot 6): mission scope from the seal, then phases
+    m = rap["mission"]
+    if m["statut"] == "arret":
+        _ev(a, "budget.stop", {"scope": "mission", "consomme": m["consomme"], "budget": m["budget"]}, actor="system")
+        print("ARRET budget mission : %s / %s tokens (>= 150 %%, %s) : question a l'utilisateur (reduire le perimetre, "
+              "changer de strategie ou arreter)" % (sum(m["consomme"].values()), m["budget"], m["note"]))
+        return 3
+    if m["statut"] == "alerte":
+        _ev(a, "budget.alert", {"scope": "mission", "consomme": m["consomme"], "budget": m["budget"]}, actor="system",
+            key="budget-alert|%d" % (sum(m["consomme"].values()) // 1000))
+        print("ALERTE budget mission : %s / %s tokens (>= 80 %%)" % (sum(m["consomme"].values()), m["budget"]))
     bil = econ.bilan(mdir, plan)
     for ph, b in sorted(bil.items()):
         if b["statut"] == "arret":
@@ -181,7 +193,10 @@ def cmd_next(a):
         if t.get("status") in ("todo", "proposed"):
             t["status"] = "ready"
         C.transition(t, "running")
-        t["execution_mode"] = econ.decide(t, rel)["level"]
+        d = econ.decide(t, rel)
+        t["execution_mode"] = d["level"]
+        _ev(a, "routing.decision", {"task": t["id"], "choix": d["level"], "raison": d["reason"], "modele": d["model"],
+                                    "alternatives": d["alternatives"]}, key="route|" + _run_id(t))
         _ev(a, "task.dispatched", {"task": t["id"], "run_id": _run_id(t), "mode": t["execution_mode"]}, key="dispatch|" + _run_id(t))
     _save(_plan_path(a), plan)
     print("lancer maintenant (<= %d en parallele) : %s ; en attente : %d ; sous-managers : %d"
@@ -223,7 +238,7 @@ def _progress_hooks(a, plan, t):
             C.atomic_write_text(bp, "# Brief synthese : mission %s\n\nResultats verifies (recus) : %s\n\nEntree : `vault.py brief %s`, "
                                 "decisions et lecons du projet. Ecrire la synthese datee, puis `mission.py close`.\n"
                                 % (a.slug, ", ".join("%s=%s" % (x["id"], x.get("receipt")) for x in tasks), a.slug))
-            print("CLOTURE : lancer sr-synthese (sonnet) avec %s, puis controle final et rapport economique (econ.py bilan)"
+            print("CLOTURE : lancer sr-synthese (sonnet) avec %s, puis controle final et rapport economique (econ.py rapport)"
                   % os.path.relpath(bp, a.project))
 
 
@@ -280,7 +295,9 @@ def cmd_done(a):
         C.transition(t, "failed")
     _save(p, plan)
     verdict = t["status"]
-    econ.spend(os.path.dirname(p), t.get("phase", "P1"), level, a.tokens or 0, estimated=a.tokens is None, run_id=rid)
+    econ.spend(os.path.dirname(p), t.get("phase", "P1"), level, a.tokens, run_id=rid, model=t.get("model"),
+               label="actual" if a.tokens is not None else "unavailable",
+               source="--tokens declare par l'agent (compteur de la session)" if a.tokens is not None else "aucun compteur transmis")
     if _ev(a, "task." + ("done" if verdict == "done" else "failed"), {"task": t["id"], "run_id": rid, "proof_code": rc,
                                                                       "tokens": a.tokens, "tokens_label": "actual" if a.tokens is not None else "unavailable"},
            key="result|" + rid):
