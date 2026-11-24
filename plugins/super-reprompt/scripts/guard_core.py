@@ -802,7 +802,9 @@ def _cli():
         rc, head = git(proj, "rev-parse", "HEAD")
         order = os.path.join(mdir, "ORDRE.md")
         seal = {"schema": 1, "slug": a.slug, "sealed_at": time.strftime("%Y-%m-%dT%H:%M:%S"),
-                "order_sha256": sha_file(order) if os.path.isfile(order) else None, "criteria": crit, "requirements": reqs,
+                "order_sha256": sha_file(order) if os.path.isfile(order) else None,
+                "plan_sha256": contracts.plan_structure_sha(load(os.path.join(mdir, "PLAN.json"))) if os.path.isfile(os.path.join(mdir, "PLAN.json")) else None,
+                "criteria": crit, "requirements": reqs,
                 "perimeter": csv(a.perimeter) or ["."], "protect": csv(a.protect), "unprotect": csv(a.unprotect),
                 "tests": sorted(tests), "tests_sha256": tests, "hosts": csv(a.hosts), "forbid": csv(a.forbid),
                 "color": a.color, "red": csv(a.red), "budget": {"max_tokens": a.budget}, "baseline_head": head.strip() if rc == 0 else None,
@@ -834,6 +836,16 @@ def _cli():
         order = os.path.join(mdir, "ORDRE.md")
         if seal.get("order_sha256") and (not os.path.isfile(order) or sha_file(order) != seal["order_sha256"]):
             out.append(("ORDRE_MODIFIE", "ORDRE.md differe de l'ordre scelle"))
+        plan_p = os.path.join(mdir, "PLAN.json")
+        if seal.get("plan_sha256"):                     # lot 2 V3.1: the plan's structure is sealed, its progress is not
+            if not os.path.isfile(plan_p):
+                out.append(("PLAN_MODIFIE", "PLAN.json scelle supprime"))
+            else:
+                try:
+                    if contracts.plan_structure_sha(load(plan_p)) != seal["plan_sha256"]:
+                        out.append(("PLAN_MODIFIE", "taches, dependances ou preuves differentes du plan scelle"))
+                except ValueError:
+                    out.append(("PLAN_MODIFIE", "PLAN.json illisible"))
         for t, h in (seal.get("tests_sha256") or {}).items():
             p = os.path.join(proj, t)
             if not os.path.isfile(p):

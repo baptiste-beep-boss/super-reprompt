@@ -27,6 +27,7 @@ import sys
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import _lib as L  # noqa: E402
 import validate_order as V  # noqa: E402
+import compile_plan as CP  # noqa: E402
 
 LANG_RE = re.compile(r"^[a-z]{2,3}(-[A-Za-z0-9]{2,8})?$")
 
@@ -94,10 +95,21 @@ def cmd_ready(a, project):
         errs.append("ORDRE.md: missing at %s. Valid: the mission order file written during framing (phase P7)" % op)
     if errs:
         raise L.UsageError("cannot mark ready, %d problem(s):\n  - %s" % (len(errs), "\n  - ".join(errs)))
+    # P3 (lot 2 V3.1): the validated order becomes the executable plan, before the mission can be marked ready
+    try:
+        plan, rep = CP.compile_plan(str(project), a.slug)
+    except CP.C.ContractError as exc:
+        raise L.UsageError("cannot mark ready, the order does not compile into PLAN.json: %s" % exc)
     st["criteria_sha256"] = L.criteria_digest(st)
     st["criteria_fingerprints"] = L.criteria_fingerprints(st)
     L.save_state(project, a.slug, st)
     print("ready: %s (criteria_sha256=%s)" % (a.slug, st["criteria_sha256"][:12]))
+    print("PLAN %s: %d task(s), order %s" % (rep["action"], rep["tasks"], plan["source_order_hash"][:12]))
+    # P2: seal automatically (order hash + plan structure hash); the firewall is active from here on
+    rc, out = CP.seal(str(project), a.slug)
+    print(out)
+    if rc != 0:
+        raise L.UsageError("ready but NOT sealed: %s" % out)
     return 0
 
 

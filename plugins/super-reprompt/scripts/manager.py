@@ -24,8 +24,10 @@ import econ  # noqa: E402
 
 
 def _run(args, cwd, timeout=600):
+    """`args` is an argv list, or a shell string (verification commands of STATE.json, compiled into PLAN.json)."""
     try:
-        p = subprocess.run(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout)
+        p = subprocess.run(args, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, timeout=timeout,
+                           shell=isinstance(args, str))
     except subprocess.TimeoutExpired:
         return 124, "timeout"
     except OSError as e:

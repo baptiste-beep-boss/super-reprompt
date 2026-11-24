@@ -66,8 +66,10 @@ def decide(t, relais=None):
 
 
 def frontier(plan):
+    """Dispatchable tasks: compiled statuses (ready, proposed whose deps are done) and the historical `todo`."""
     done = {t["id"] for t in plan.get("tasks", []) if t.get("status") == "done"}
-    return [t for t in plan.get("tasks", []) if t.get("status", "todo") == "todo" and all(d in done for d in t.get("deps", []))]
+    return [t for t in plan.get("tasks", []) if t.get("status", "todo") in ("todo", "ready", "proposed")
+            and all(d in done for d in t.get("deps", []))]
 
 
 def group(tasks_, relais=None):

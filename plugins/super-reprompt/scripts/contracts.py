@@ -246,7 +246,7 @@ def _v_plan(o, strict, errs):
         if strict:
             if not (isinstance(t.get("acceptance_criteria"), list) and t["acceptance_criteria"]):
                 errs.append("%s : acceptance_criteria vide" % tid)
-            if not (isinstance(t.get("preuve"), list) and t["preuve"]):
+            if not ((isinstance(t.get("preuve"), list) and t["preuve"]) or (isinstance(t.get("preuve"), str) and t["preuve"].strip())):
                 errs.append("%s : preuve (commande) absente" % tid)
             if st in LEGACY_STATUS:
                 errs.append("%s : statut historique %r interdit en mode strict" % (tid, st))
@@ -340,6 +340,17 @@ def check(kind, obj, strict=False):
     if errs:
         raise ContractError("%s invalide : %s" % (kind, "; ".join(errs[:5])))
     return obj
+
+
+PROGRESS_KEYS = ("status", "attempt", "receipt", "updated_at", "owner", "started_at", "finished_at")
+
+
+def plan_structure_sha(plan):
+    """SHA-256 of what the plan PROMISES (tasks, deps, coverage, proofs), not of its progress: statuses, attempts and
+    receipts change during execution without changing this hash; adding or rewiring a task changes it."""
+    tasks = [{k: v for k, v in sorted(t.items()) if k not in PROGRESS_KEYS} for t in plan.get("tasks", []) if isinstance(t, dict)]
+    body = {"tasks": tasks, "source_order_hash": plan.get("source_order_hash")}
+    return hashlib.sha256(json.dumps(body, sort_keys=True, ensure_ascii=False, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
 # ------------------------------------------------------------------ events
