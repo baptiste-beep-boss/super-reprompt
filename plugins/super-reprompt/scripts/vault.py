@@ -327,7 +327,7 @@ def cmd_init(ctx, slug):
     return 0
 
 
-KINDS = ("note", "tache", "decision", "blocage", "phase", "lecon")
+KINDS = ("note", "tache", "decision", "blocage", "phase", "lecon", "vigie", "budget")   # vigie, budget: L8 super-manager loop
 SUSPECT = ("key", "secret", "token", "passw", "private", "sk-", "akia", "xox", "ghp_", "gho_", "ghu_", "ghs_", "ghr_", "eyj", "0x")
 
 
