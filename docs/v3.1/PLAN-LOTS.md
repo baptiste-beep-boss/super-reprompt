@@ -19,3 +19,9 @@ cosmétique : les neuf pôles du §4 sont documentés comme une carte des module
 
 Séquence : 1 → 2 → 3 (socle), puis 4, 6, 7, 8 (indépendants, fichiers disjoints), 5, 9, 10.
 Le banc du lot 10 est préparé dès le lot 1 et rejoué en version courte après le lot 3.
+
+## Décisions validées par l'utilisateur (24/11/2026)
+- Barre : relancée au lot 9 (lit PLAN.json + événements, capture réelle exigée).
+- Push : branche `v3` poussée à la fin de chaque lot validé (tests verts) ; jamais `main`, jamais de release.
+- Banc du lot 10 : taille moyenne, 3 tâches (simple, moyenne, complexe) × 3 bras × 3 répétitions = 27 sessions.
+- Plan validé tel quel ; enchaînement autonome, arrêt seulement pour ce qui engage un service externe.
