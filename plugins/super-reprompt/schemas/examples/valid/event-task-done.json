@@ -1,0 +1,12 @@
+{
+ "event_id": "0123456789abcdef0123456789abcdef",
+ "mission_id": "demo-mission",
+ "timestamp": "2026-11-24T10:00:00Z",
+ "event_type": "task.done",
+ "actor": "manager",
+ "schema_version": 1,
+ "correlation_id": "run-1",
+ "payload": {
+  "task": "T1"
+ }
+}

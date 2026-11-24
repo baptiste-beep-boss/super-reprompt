@@ -7,7 +7,7 @@ import time
 
 DIR = ".super-reprompt"
 SAFE_RM = ("__pycache__", "node_modules", "build", "dist", ".pytest_cache", ".mypy_cache", "tmp", "temp", ".cache", "coverage", "htmlcov")
-MISSION_FILES = ("scelle.json", "state.json", "ordre.md", "progress.json", "journal.ndjson", "derives.json", "ferme")
+MISSION_FILES = ("scelle.json", "state.json", "ordre.md", "progress.json", "journal.ndjson", "events.ndjson", "derives.json", "ferme")
 PROT_NAMES = ("scelle.json", "settings.json", "settings.local.json", "hooks.json", "guard.py", "guard_core.py")
 DEF_HOSTS = ("localhost", "127.0.0.1", "::1", "[::1]", "0.0.0.0")
 FIN_TOOLS = ("execute_order", "execute_spot", "execute_prediction", "execute_tpsl", "deposit_earn", "withdraw_earn", "close_position",
@@ -37,8 +37,13 @@ def journal(ev, rule="", msg=""):
     if not d:
         return
     try:
-        with open(os.path.join(d, "journal.ndjson"), "a", encoding="utf-8") as f:
-            f.write('{"t":"%s","ev":"%s","rule":"%s","msg":"%s"}\n' % (time.strftime("%Y-%m-%dT%H:%M:%S"), ev, rule, _jstr(msg)))
+        # unified mission journal (contracts.py, event schema 1), formatted by hand: no json import on the hot path
+        line = ('{"event_id":"%s","mission_id":"%s","timestamp":"%s","event_type":"guard.%s","actor":"system",'
+                '"schema_version":1,"correlation_id":null,"payload":{"rule":"%s","msg":"%s"}}\n'
+                % (os.urandom(16).hex(), _jstr(os.path.basename(os.path.normpath(d))), time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+                   "".join(c for c in str(ev).lower() if c.isalnum() or c == "_") or "event", _jstr(rule), _jstr(msg)))
+        with open(os.path.join(d, "events.ndjson"), "a", encoding="utf-8", newline="\n") as f:
+            f.write(line)
     except Exception:
         pass
 
@@ -737,6 +742,8 @@ def _cli():
     import hashlib
     import json
     import subprocess
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import contracts                                   # single atomic writer (lot 1 V3.1): SCELLE, derives, FERME
 
     def sha_file(p):
         h = hashlib.sha256()
@@ -801,8 +808,7 @@ def _cli():
                 "color": a.color, "red": csv(a.red), "budget": {"max_tokens": a.budget}, "baseline_head": head.strip() if rc == 0 else None,
                 "avenants": []}
         seal["body_sha"] = body_sha(seal)
-        with open(os.path.join(mdir, "SCELLE.json"), "w", encoding="utf-8") as f:
-            json.dump(seal, f, ensure_ascii=False, indent=2)
+        contracts.atomic_write_json(os.path.join(mdir, "SCELLE.json"), seal, indent=2)
         print("SCELLE ecrit: %s (%d criteres, %d tests scelles, couleur %s)" % (mdir, len(crit), len(tests), a.color))
 
     def cmd_avenant(a):
@@ -813,8 +819,7 @@ def _cli():
         ent = {"date": time.strftime("%Y-%m-%dT%H:%M:%S"), "approved_by": a.approved_by, "text": a.text, "grants": csv(a.grants), "prev": prev}
         ent["sha"] = hashlib.sha256(json.dumps(ent, sort_keys=True, ensure_ascii=False).encode("utf-8")).hexdigest()
         seal["avenants"].append(ent)
-        with open(sp, "w", encoding="utf-8") as f:
-            json.dump(seal, f, ensure_ascii=False, indent=2)
+        contracts.atomic_write_json(sp, seal, indent=2)
         print("AVENANT ajoute (%d au total), rien n'est efface" % len(seal["avenants"]))
 
     def findings_common(proj, mdir, seal):
@@ -904,14 +909,21 @@ def _cli():
             used = load(pg).get("tokens_used")
             if isinstance(used, (int, float)) and used > mx:
                 out.append(("BUDGET_DEPASSE", "%s > %s" % (used, mx)))
-        jp = os.path.join(mdir, "journal.ndjson")
-        if os.path.isfile(jp):
-            evs = []
-            for ln in open(jp, encoding="utf-8").read().splitlines():
+        evs = []
+        for jn in ("journal.ndjson", "events.ndjson"):         # legacy journal first, then the unified one
+            jp = os.path.join(mdir, jn)
+            if not os.path.isfile(jp):
+                continue
+            for ln in open(jp, encoding="utf-8", errors="replace").read().splitlines():
                 try:
-                    evs.append(json.loads(ln))
+                    e = json.loads(ln)
                 except ValueError:
-                    pass
+                    continue
+                if isinstance(e, dict) and str(e.get("event_type", "")).startswith("guard."):
+                    e = {"ev": e["event_type"][6:], "msg": (e.get("payload") or {}).get("msg", "")}
+                if isinstance(e, dict):
+                    evs.append(e)
+        if evs:
             ran = False
             for e in evs:
                 if e.get("ev") == "bash" and any(k in e.get("msg", "").lower() for k in ("unittest", "pytest", "npm test", "node --test", "accept.py")):
@@ -931,8 +943,7 @@ def _cli():
             lvl = 4 if n >= 2 else 3
             worst = max(worst, lvl if code != "PLAN_ABSENT" else 0)
             print("[%s] %s %s -> %s" % (kind, code, msg, "QUESTION a l'utilisateur (2e fois)" if n >= 2 and code != "PLAN_ABSENT" else "corriger" if code != "PLAN_ABSENT" else "info"))
-        with open(dp, "w", encoding="utf-8") as f:
-            json.dump(cnt, f, ensure_ascii=False, indent=1)
+        contracts.atomic_write_json(dp, cnt)
         if getattr(a, "json", False):
             print(json.dumps({"findings": out, "exit": worst}, ensure_ascii=False))
         if not out:
@@ -941,8 +952,7 @@ def _cli():
 
     def cmd_close(a):
         proj, mdir = locate(a)
-        with open(os.path.join(mdir, "FERME"), "w", encoding="utf-8") as f:
-            f.write(time.strftime("%Y-%m-%dT%H:%M:%S") + "\n")
+        contracts.atomic_write_text(os.path.join(mdir, "FERME"), time.strftime("%Y-%m-%dT%H:%M:%S") + "\n")
         print("mission fermee: le hook est de nouveau silencieux")
 
     ap = argparse.ArgumentParser(prog="guard.py", description=__doc__.split("\n")[0])

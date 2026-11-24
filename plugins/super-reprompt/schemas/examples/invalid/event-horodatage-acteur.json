@@ -1,0 +1,11 @@
+{
+ "event_id": "0123456789abcdef0123456789abcdef",
+ "mission_id": "demo-mission",
+ "timestamp": "24/11/2026",
+ "event_type": "task.done",
+ "actor": "martien",
+ "schema_version": 1,
+ "payload": {
+  "task": "T1"
+ }
+}

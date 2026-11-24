@@ -1,0 +1,33 @@
+{
+ "schema": 1,
+ "slug": "demo-mission",
+ "sealed_at": "2026-11-24T10:00:00",
+ "order_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+ "plan_sha256": "0000000000000000000000000000000000000000000000000000000000000001",
+ "criteria": [
+  {
+   "id": "C1",
+   "text": "HTTP 200"
+  }
+ ],
+ "requirements": [
+  "R1"
+ ],
+ "perimeter": [
+  "site"
+ ],
+ "protect": [],
+ "unprotect": [],
+ "tests": [],
+ "tests_sha256": {},
+ "hosts": [],
+ "forbid": [],
+ "color": "orange",
+ "red": [],
+ "budget": {
+  "max_tokens": 300000
+ },
+ "baseline_head": null,
+ "avenants": [],
+ "body_sha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+}

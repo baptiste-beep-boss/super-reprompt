@@ -19,6 +19,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
+import contracts  # noqa: E402
 import econ  # noqa: E402
 
 
@@ -48,10 +49,7 @@ def _load(p):
 
 
 def _save(p, plan):
-    tmp = p + ".tmp"
-    with open(tmp, "w", encoding="utf-8", newline="\n") as f:
-        json.dump(plan, f, ensure_ascii=False, indent=1)
-    os.replace(tmp, p)
+    contracts.save_checked(p, plan, "plan")
 
 
 def cmd_next(a):

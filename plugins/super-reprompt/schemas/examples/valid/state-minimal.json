@@ -1,0 +1,100 @@
+{
+ "schema": 1,
+ "slug": "demo-mission",
+ "created": "2026-01-01T00:00:00Z",
+ "lang": "en",
+ "level": "mixed",
+ "class": "CODE",
+ "tier": "standard",
+ "status": "ready",
+ "framing_session_id": "frame-1",
+ "exec_session_id": null,
+ "budget": {
+  "announced_k": 35,
+  "spent_est_k": 0,
+  "cap_k": 100,
+  "exec_estimate_k": [
+   150,
+   400
+  ]
+ },
+ "requirements": [
+  {
+   "id": "R1",
+   "text": "Page shows the refund policy",
+   "kind": "unguessable"
+  }
+ ],
+ "assumptions": [
+  "Plain HTML is fine"
+ ],
+ "out_of_scope": [
+  "Payment flow"
+ ],
+ "permissions": {
+  "allow": [
+   "edit files in src/"
+  ],
+  "deny": [
+   "delete files",
+   "git push",
+   "network writes",
+   "credentials"
+  ]
+ },
+ "capabilities": [
+  {
+   "id": "K1",
+   "name": "dataviz",
+   "kind": "skill",
+   "phase": "P4",
+   "trigger": "any chart",
+   "call": "Skill(dataviz)",
+   "proof": "a Skill tool_use named dataviz appears in the transcript",
+   "required": true,
+   "side_effects": false,
+   "plan_b": "draw the chart by hand and say so",
+   "removed_reason": null
+  }
+ ],
+ "verification": {
+  "commands": [
+   {
+    "id": "V1",
+    "cmd": "exit 0",
+    "state": "pending",
+    "reason": null,
+    "plan_b": "run the checks by hand and report"
+   }
+  ],
+  "criteria": [
+   {
+    "id": "C1",
+    "text": "The refund page returns HTTP 200",
+    "source": "test",
+    "proof": "curl output",
+    "passes": false,
+    "unsourced": false
+   }
+  ]
+ },
+ "agents": [
+  {
+   "name": "worker-1",
+   "model": "sonnet",
+   "effort": "medium",
+   "max_turns": 30,
+   "skills": [],
+   "isolation": "none",
+   "report_max_tokens": 1500
+  }
+ ],
+ "launch": {
+  "model": "sonnet",
+  "effort": "medium",
+  "permission_mode": "default",
+  "name": "demo-mission",
+  "unattended": false
+ },
+ "stop_blocks": 0
+}

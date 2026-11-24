@@ -1,0 +1,57 @@
+{
+ "schema": 2,
+ "slug": "demo-mission",
+ "source_order_hash": "0000000000000000000000000000000000000000000000000000000000000001",
+ "compiled_at": "2026-11-24T10:00:00Z",
+ "phases": {
+  "P1": {
+   "budget_tokens": 200000
+  }
+ },
+ "tasks": [
+  {
+   "id": "T1",
+   "title": "Ecrire la page",
+   "status": "ready",
+   "deps": [
+    "T2"
+   ],
+   "covers": [
+    "R1"
+   ],
+   "files": [
+    "site/"
+   ],
+   "acceptance_criteria": [
+    "la page contient la politique"
+   ],
+   "preuve": [
+    "python",
+    "-c",
+    "print(1)"
+   ],
+   "phase": "P1"
+  },
+  {
+   "id": "T2",
+   "title": "Verifier",
+   "status": "proposed",
+   "deps": [
+    "T1"
+   ],
+   "covers": [
+    "C1"
+   ],
+   "files": [],
+   "acceptance_criteria": [
+    "HTTP 200"
+   ],
+   "preuve": [
+    "python",
+    "-c",
+    "print(2)"
+   ],
+   "phase": "P1"
+  }
+ ]
+}

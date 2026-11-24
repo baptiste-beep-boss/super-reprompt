@@ -90,36 +90,12 @@ def lock_path(ctx, slug):
     return os.path.join(d, tag + ".lock")
 
 
-class Lock:
-    """Verrou fichier simple (creation exclusive). Perime au bout de 60 s."""
-
-    def __init__(self, path, timeout=20.0, stale=60.0):
-        self.path, self.timeout, self.stale = path, timeout, stale
-
-    def __enter__(self):
-        import time
-        end = time.time() + self.timeout
-        while True:
-            try:
-                self.fd = os.open(self.path, os.O_CREAT | os.O_EXCL | os.O_WRONLY)
-                return self
-            except FileExistsError:
-                try:
-                    if time.time() - os.stat(self.path).st_mtime > self.stale:
-                        os.remove(self.path)
-                        continue
-                except OSError:
-                    continue
-                if time.time() > end:
-                    raise TimeoutError("verrou occupe : " + self.path)
-                time.sleep(0.02)
-
-    def __exit__(self, *a):
-        os.close(self.fd)
-        try:
-            os.remove(self.path)
-        except OSError:
-            pass
+def Lock(path, timeout=20.0, stale=60.0):
+    """Single lock implementation (contracts.Lock, lot 1 V3.1): also survives the Windows PermissionError raised
+    while another process deletes the lock file. Imported lazily so `search` keeps importing only os, sys, sqlite3."""
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import contracts
+    return contracts.Lock(path, timeout=timeout, stale=stale)
 
 
 # ----------------------------------------------------------------------------- scan / lecture
@@ -363,10 +339,12 @@ def cmd_log(ctx, slug, kind, text):
     d = ctx.project_dir(slug)
     if not all(os.path.exists(os.path.join(d, n + ".md")) for n in templates(slug)):
         ensure_project(ctx, slug)
+    import re
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import contracts                     # unified mission journal events.ndjson (lot 1 V3.1)
     with Lock(lock_path(ctx, slug)):
-        os.makedirs(mdir, exist_ok=True)
-        append(os.path.join(mdir, "journal.ndjson"),
-               '{"ts":%s,"slug":%s,"kind":%s,"text":%s}\n' % (jstr(ts), jstr(slug), jstr(kind), jstr(text)))
+        contracts.emit(mdir, "log." + (re.sub(r"[^a-z0-9_]", "_", kind.lower()) or "note"), "manager",
+                       {"kind": kind, "text": text}, mission_id=slug, timestamp=ts)
         append(os.path.join(d, slug + "-journal.md"), "- %s · %s · %s\n" % (ts, kind, text))
     return 0
 

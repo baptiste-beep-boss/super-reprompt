@@ -164,10 +164,12 @@ class TestLogInitBrief(Base):
         r = self.run_v("log", "demo-x", "--kind", "decision", "choix", "de", "FTS5")
         self.assertEqual(r.returncode, 0, r.stderr)
         self.run_v("log", "demo-x", "deuxieme ligne")
-        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "journal.ndjson")
+        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "events.ndjson")
         rows = [json.loads(l) for l in rd(nd).splitlines()]
-        self.assertEqual([x["kind"] for x in rows], ["decision", "note"])
-        self.assertRegex(rows[0]["ts"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+        self.assertEqual([x["event_type"] for x in rows], ["log.decision", "log.note"])
+        self.assertEqual(rows[0]["payload"]["text"], "choix de FTS5")
+        self.assertRegex(rows[0]["timestamp"], r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}Z$")
+        self.assertFalse(os.path.exists(os.path.join(self.cwd, ".super-reprompt", "demo-x", "journal.ndjson")))
         md = rd(os.path.join(self.vault, "projets", "demo-x", "demo-x-journal.md"))
         self.assertIn("choix de FTS5", md)
         self.assertIn("deuxieme ligne", md)
@@ -175,7 +177,7 @@ class TestLogInitBrief(Base):
     def test_log_refuses_secrets(self):
         r = self.run_v("log", "demo-x", "cle", "sk-ant-api03-" + "A" * 40)
         self.assertEqual(r.returncode, 2)
-        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "journal.ndjson")
+        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "events.ndjson")
         self.assertFalse(os.path.exists(nd))
 
     def test_log_is_fast(self):
@@ -192,7 +194,7 @@ class TestLogInitBrief(Base):
                  for i in range(6) for j in range(5)]
         for p in procs:
             p.wait(timeout=120)
-        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "journal.ndjson")
+        nd = os.path.join(self.cwd, ".super-reprompt", "demo-x", "events.ndjson")
         rows = [json.loads(l) for l in rd(nd).splitlines()]
         self.assertEqual(len(rows), 30)
         md = rd(os.path.join(self.vault, "projets", "demo-x", "demo-x-journal.md"))

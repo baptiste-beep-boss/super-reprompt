@@ -168,23 +168,13 @@ def read_json(path, default=None):
 
 
 def write_json(path, obj):
-    """Atomic write (temp file + replace)."""
-    p = Path(path)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_name(p.name + ".tmp%d" % os.getpid())
-    with open(str(tmp), "w", encoding="utf-8", newline="\n") as f:
-        json.dump(obj, f, ensure_ascii=False, indent=2, sort_keys=False)
-        f.write("\n")
-    os.replace(str(tmp), str(p))
+    """Atomic write through the single implementation (contracts.atomic_write_text: unique temp, fsync, replace)."""
+    write_text(path, json.dumps(obj, ensure_ascii=False, indent=2, sort_keys=False) + "\n")
 
 
 def write_text(path, text):
-    p = Path(path)
-    p.parent.mkdir(parents=True, exist_ok=True)
-    tmp = p.with_name(p.name + ".tmp%d" % os.getpid())
-    with open(str(tmp), "w", encoding="utf-8", newline="\n") as f:
-        f.write(text)
-    os.replace(str(tmp), str(p))
+    import contracts                     # same directory as _lib (scripts/), already on sys.path for every caller
+    contracts.atomic_write_text(str(path), text)
 
 
 # ----------------------------------------------------------------- paths

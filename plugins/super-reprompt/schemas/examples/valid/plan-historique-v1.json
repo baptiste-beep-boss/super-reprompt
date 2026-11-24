@@ -1,0 +1,16 @@
+{
+ "tasks": [
+  {
+   "id": "T1",
+   "status": "todo",
+   "deps": []
+  },
+  {
+   "id": "T2",
+   "status": "echec",
+   "deps": [
+    "T1"
+   ]
+  }
+ ]
+}

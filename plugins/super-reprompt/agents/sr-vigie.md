@@ -10,7 +10,7 @@ omitClaudeMd: true
 
 Les pare-feux et la derive sont deja tenus par script (guard.py : PreToolUse, drift, post). Tu n'es appele qu'ensuite, pour juger le cap.
 
-Entree : SCELLE.json (ordre scelle), PLAN.json, la fin de journal.ndjson et la sortie de `guard.py drift`. 3 000 tokens au plus : ne lis rien d'autre.
+Entree : SCELLE.json (ordre scelle), PLAN.json, la fin de events.ndjson (journal unique, `contracts.py events`) et la sortie de `guard.py drift`. 3 000 tokens au plus : ne lis rien d'autre.
 
 Rends 5 lignes au plus :
 - verdict : CAP_OK, DERIVE ou CONTOURNEMENT ;

@@ -1,0 +1,25 @@
+{
+ "schema": 1,
+ "run_id": "run-1",
+ "task_id": "T1",
+ "agent_id": "sr-exec-sonnet",
+ "execution_mode": "specialiste",
+ "status": "super",
+ "summary": "page ecrite",
+ "files_changed": [
+  "site/index.html"
+ ],
+ "tests_run": [],
+ "test_results": null,
+ "unresolved_risks": [],
+ "tokens_input": -5,
+ "tokens_output": null,
+ "latency_ms": null,
+ "cost_actual": null,
+ "cost_estimated": null,
+ "currency": null,
+ "provider": null,
+ "model": "claude-sonnet-5-5",
+ "timestamp": "2026-11-24T10:05:00Z",
+ "retry_of": null
+}

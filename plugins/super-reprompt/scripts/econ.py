@@ -95,9 +95,10 @@ def budget_status(spent, cap):
 
 
 def spend(mdir, phase, poste, toks, estimated=False):
+    import contracts                                    # locked append (lot 1 V3.1): no interleaving between agents
     os.makedirs(mdir, exist_ok=True)
-    with open(os.path.join(mdir, "econ.ndjson"), "a", encoding="utf-8", newline="\n") as f:
-        f.write(json.dumps({"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": int(toks), "estime": bool(estimated)}) + "\n")
+    contracts.append_line(os.path.join(mdir, "econ.ndjson"),
+                          json.dumps({"ts": int(time.time()), "phase": phase, "poste": poste, "tokens": int(toks), "estime": bool(estimated)}))
 
 
 def bilan(mdir, plan):

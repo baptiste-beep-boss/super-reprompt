@@ -18,7 +18,7 @@ Commands (full Python, not on the hot path):
   avenant ...                          signed by the owner in their own terminal: the hook refuses it when Claude runs it
 
 A hook is not a sandbox: commands can hide writes (a script that writes elsewhere, obfuscation).  What the hook cannot parse,
-`post` detects by comparing git state to the seal.  Every denial is appended to journal.ndjson.
+`post` detects by comparing git state to the seal.  Every denial is appended to events.ndjson (unified journal, contracts.py).
 """
 import os
 import sys
