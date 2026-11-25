@@ -7,6 +7,7 @@ const MIN = 60_000
 // Hors mission (pas de dossier .super-reprompt), le mod doit rester muet (invariant I7).
 let MISSION = true
 let REGISTERED: string[] = []
+const LOGS: string[] = []
 
 // Le monde sous le plugin : outils simulés, horloge et magasin en mémoire.
 function world(on: any, store: Record<string, unknown> = {}, fails: (cmd: string) => string | undefined = () => undefined) {
@@ -17,7 +18,7 @@ function world(on: any, store: Record<string, unknown> = {}, fails: (cmd: string
   on('session.start', (_: any, e: any) => ({ cwd: e.cwd }))
   on('turn.start', (_: any, e: any) => ({ turnId: e.turnId }))
   on('turn.complete', () => ({ text: '' }))
-  on('ui.log', () => ({ value: undefined }))
+  on('ui.log', (_: any, e: any) => (LOGS.push(JSON.stringify(e)), { value: undefined }))
   on('fs.stat', () => {
     if (!MISSION) throw new Error('ENOENT')
     return { value: { kind: 'dir', size: 0, mtimeMs: 0, isLink: false } }
@@ -215,4 +216,21 @@ test('hors mission : ni outil, ni consigne, ni barre, même avec une liste nativ
     expect(s.bar).toBe(false)
     expect(s.text).toBe('')
   } finally { MISSION = true }
+})
+
+test('V3.1 lot 9 : avec une mission compilée, la barre affiche la projection BAR.json (PLAN + événements), sans liste séparée', async ($, on) => {
+  world(on)
+  LOGS.length = 0
+  const BAR = JSON.stringify({ updated: '2026-11-25T10:00:00Z', display: { percent: 40, text: '20 min - 45 min (confiance faible)' } })
+  on('fs.list', () => ({ value: [{ name: 'page-tarifs', kind: 'dir', size: 0, mtimeMs: 0, isLink: false }] }))
+  on('fs.exists', () => ({ value: true }))
+  on('fs.read', () => ({ value: BAR }))
+  await boot($)
+  await turn($)
+  await $.tool.call({ tool: 'Bash', command: 'py -3 scripts/manager.py done T1 --report r.txt --project . --slug page-tarifs' })
+  const s = await seen($)
+  expect(LOGS.join(' | ')).toBe('')
+  expect(s.bar).toBe(true)
+  expect(s.text).toContain('40 %')
+  expect(s.text).toContain('20 min - 45 min')
 })

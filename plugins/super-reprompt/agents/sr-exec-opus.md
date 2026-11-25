@@ -1,6 +1,6 @@
 ---
 name: sr-exec-opus
-description: Executant generique (Opus 5.5) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches d'architecture et de securite qui justifient la porte chiffree de couts.
+description: "Executant generique (Opus 5.5) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches d'architecture et de securite qui justifient la porte chiffree de couts."
 tools: Read, Write, Edit, Grep, Glob
 model: opus
 maxTurns: 40

@@ -1,6 +1,6 @@
 ---
 name: sr-exec-sonnet
-description: Executant generique (Sonnet 5.5) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches de construction et de revue courantes.
+description: "Executant generique (Sonnet 5.5) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches de construction et de revue courantes."
 tools: Read, Write, Edit, Grep, Glob
 model: sonnet
 maxTurns: 30

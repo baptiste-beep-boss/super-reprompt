@@ -30,3 +30,20 @@ Une capture de l'app avec la ligne visible (0 %, puis un état intermédiaire), 
 
 ## Plan B si la ligne n'apparaît pas (§5.3 du cahier)
 Ligne d'état (`$.ui.status`), puis `Pane` ancrée en bas ; fenêtre WPF seulement sur accord écrit.
+
+## V3.1 (lot 9) : capture avec une mission compilee (critere A08)
+Depuis le lot 9, quand une mission compilee existe, la barre affiche `.super-reprompt/<mission>/BAR.json`, projection de
+`PLAN.json` et `events.ndjson` reecrite par `manager.py next` / `done`. La session qui a construit ce lot ne peut pas
+capturer l'app de bureau elle-meme : la capture est a faire par toi, en 5 minutes :
+
+```powershell
+$plugin = (Resolve-Path ".\plugins\super-reprompt").Path
+py -3 "$plugin\dev\mission_lot9.py"    # verifie d'abord le calcul (8/8 attendu)
+New-Item -ItemType Directory -Force "$env:TEMP\essai-barre" | Out-Null
+Set-Location "$env:TEMP\essai-barre"; git init -q
+claude --plugin-dir $plugin
+```
+Dans la session : « cadre une mission de 3 taches avec durees estimees, `mission.py ready`, puis `manager.py next` ».
+Capturer : (1) la ligne au-dessus de la saisie juste apres `next` (0 %, fourchette de temps) ; (2) apres `manager.py done`
+de la premiere tache (le pourcentage du travail monte) ; (3) le meme dossier sans `.super-reprompt` (aucune ligne).
+Deposer les captures dans `dev/captures/` ou dans la conversation : A08 reste NOT MEASURED tant qu'elles n'existent pas.

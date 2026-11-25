@@ -1,6 +1,6 @@
 ---
 name: sr-exec-haiku
-description: Executant generique (Haiku) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches simples et volumineuses.
+description: "Executant generique (Haiku) : recoit PAR CHEMIN un role du catalogue (agent, skill ou commande sous vendor/) et l'applique aux fichiers indiques. Taches simples et volumineuses."
 tools: Read, Write, Edit, Grep, Glob
 model: haiku
 maxTurns: 20

@@ -1,6 +1,6 @@
 ---
 name: sr-archiviste
-description: Fin de phase d'une mission : range le delta du journal dans les notes du projet (decisions, lecons, tableau). Haiku, lecture seule du reste du vault, jamais de contenu envoye hors machine.
+description: "Fin de phase d'une mission : range le delta du journal dans les notes du projet (decisions, lecons, tableau). Haiku, lecture seule du reste du vault, jamais de contenu envoye hors machine."
 tools: Read, Write, Edit, Grep
 model: haiku
 maxTurns: 12

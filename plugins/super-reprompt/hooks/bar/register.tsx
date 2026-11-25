@@ -95,10 +95,35 @@ async function save($: EngineInterface) {
   await saves
 }
 
+// V3.1 lot 9 : quand une mission compilée existe, la barre est la PROJECTION de PLAN.json + events.ndjson que
+// scripts/progress.py écrit dans .super-reprompt/<mission>/BAR.json (manager next / done). Aucune liste séparée,
+// aucun calcul ici : la plus récente est lue telle quelle. Sans BAR.json, le moteur ci-dessous reste le repli.
+let planView: BarView | null = null
+
+async function readPlanBar($: EngineInterface): Promise<BarView | null> {
+  try {
+    const base = `${cwd}/.super-reprompt`
+    let best: { at: string; v: BarView } | null = null
+    for (const d of await $.fs.list(base)) {
+      if (d.kind !== 'dir') continue
+      const p = `${base}/${d.name}/BAR.json`
+      if (!(await $.fs.exists(p))) continue
+      const b = JSON.parse(String(await $.fs.read(p))) as { updated?: string; display?: BarView }
+      if (b.display === undefined || typeof b.display.percent !== 'number') continue
+      const at = b.updated ?? ''
+      if (best === null || at > best.at) best = { at, v: { percent: b.display.percent, text: String(b.display.text ?? '') } }
+    }
+    return best === null ? null : best.v
+  } catch (x) {
+    $.ui.log(`super-reprompt: projection BAR.json illisible (${String(x)})`)
+    return null
+  }
+}
+
 async function show($: EngineInterface) {
   const now = await $.clock.now()
-  let v: BarView | null = null
-  if (project !== null && project.tasks.length > 0 && !hidden) {
+  let v: BarView | null = planView
+  if (v === null && project !== null && project.tasks.length > 0 && !hidden) {
     const w = E.view(project, now)
     v = { percent: w.percent, text: E.fmtEta(w.eta) }
   }
@@ -221,11 +246,14 @@ export const register: Register = on => {
     numbers = raw?.numbers ?? {}
     hidden = project !== null && E.isOver(project)
     await $.tool.register({ name: 'project', description: 'Declares and updates the project plan behind the person\'s progress bar (percent and time left for the WHOLE project).', inputSchema: SCHEMA, isDeferred: true })
+    planView = await readPlanBar($)
     await show($)
-    // Toutes les 5 s, l'horloge de travail avance ; rien n'est redessiné sans changement.
+    // Toutes les 5 s, l'horloge de travail avance ; rien n'est redessiné sans changement. La projection du plan, elle, ne
+    // change qu'après une commande (manager next / done) : elle est relue après chaque Bash/PowerShell et en fin de tour.
     if (ticking) return next(e)
     ticking = true
     $.clock.every(5000, async () => {
+      if (planView !== null) return
       if (project === null || hidden) return
       project = E.tick(project, await $.clock.now())
       await show($)
@@ -255,6 +283,11 @@ export const register: Register = on => {
       project = E.turnEnd(project, e.agentId ?? 'main', await $.clock.now())
       await commit($)
     }
+    const pv = await readPlanBar($)
+    if (pv !== null || planView !== null) {
+      planView = pv
+      await show($)
+    }
     return next(e)
   })
 
@@ -273,6 +306,13 @@ export const register: Register = on => {
     const r = await next(e)
     const a = e as unknown as Record<string, unknown>
     const failed = r.deny !== undefined || r.isError === true
+    if (tool === 'Bash' || tool === 'PowerShell') {
+      const pv = await readPlanBar($)
+      if (pv !== null || planView !== null) {
+        planView = pv
+        await show($)
+      }
+    }
     if ((tool === 'Bash' || tool === 'PowerShell') && project !== null && r.deny === undefined && a.run_in_background !== true) {
       const cmd = String(a.command ?? '')
       const v = S.verdict(cmd, failed, r.text ?? '')

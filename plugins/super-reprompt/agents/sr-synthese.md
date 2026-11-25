@@ -1,6 +1,6 @@
 ---
 name: sr-synthese
-description: Fin de phase ou de projet : ecrit la synthese datee <slug>-phase-N.md a partir du brief et des notes rangees. Sonnet 5.5, vault rouge, jamais envoye hors machine.
+description: "Fin de phase ou de projet : ecrit la synthese datee <slug>-phase-N.md a partir du brief et des notes rangees. Sonnet 5.5, vault rouge, jamais envoye hors machine."
 tools: Read, Write, Edit, Grep
 model: sonnet
 maxTurns: 15

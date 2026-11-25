@@ -413,7 +413,14 @@ def main(argv=None):
         s.add_argument("--slug", required=True)
     a = ap.parse_args(argv)
     a.project = os.path.abspath(a.project)
-    return {"next": cmd_next, "done": cmd_done, "status": cmd_status}[a.cmd](a)
+    rc = {"next": cmd_next, "done": cmd_done, "status": cmd_status}[a.cmd](a)
+    if a.cmd != "status" and os.path.isfile(_plan_path(a)):     # lot 9: the bar's store is a projection, refreshed here
+        try:
+            import progress
+            progress.write(_mdir(a))
+        except Exception as e:                                     # degraded, said: the loop never fails because of the bar
+            print("barre : projection non ecrite (%s)" % type(e).__name__)
+    return rc
 
 
 if __name__ == "__main__":
