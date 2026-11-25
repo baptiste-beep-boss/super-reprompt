@@ -107,6 +107,28 @@ passwords, API keys or tokens in it.
 - If a user skill with the short name `super-reprompt` is installed, it can mask the plugin skill when the plugin call fails.
   Uninstall one of the two, or always call the full name `super-reprompt:super-reprompt`.
 
+## The V3.1 mission cycle (how the pieces connect)
+
+One cycle, one source of truth per artefact (`.super-reprompt/<slug>/`):
+
+| Step | Command (run by the session, never by hand-editing files) | Writes |
+|---|---|---|
+| Framing (P0-P4) | the `super-reprompt` skill; optional `STATE.tasks` for the decomposition | `STATE.json`, `ORDRE.md` |
+| Ready (P7 -> P3 -> P2) | `scripts/mission.py ready <slug>`: compiles and seals, no manual step | `PLAN.json` (hash of the order), `SCELLE.json` (hash of order and plan) |
+| Capabilities (P4) | done by the compiler (`eclaireur.capacites`, 7 types, integrity, context budget) | `capabilities` per task in `PLAN.json` |
+| Execution (P5-P7) | `scripts/manager.py next` then `manager.py done <task> --report F --tokens N` | `receipts/`, `events.ndjson`, `econ.ndjson`, `BAR.json` |
+| Watch | run by `next` and `done` (`guard.py drift` + `post`, graded; milestones 25/50/75/100 %) | `vigie.*` events; a blocking finding sets the task `blocked` |
+| Memory (P8) | run by `done` at the end of a phase and at closure (`scripts/memoire.py`) | project notes, `REPRISE.md` |
+| Closure (P9-P10) | `scripts/econ.py rapport <mission dir>`, then `mission.py close` | cost report: actual / estimated / projected kept apart |
+
+Resume after an interruption: `manager.py status` (what remains, what to relaunch, `REPRISE.md`). A replayed `done`
+duplicates nothing. Contracts: `schemas/README.md`. Relais providers: `net/RELAIS.md` (optional; without one the Relais
+says so and keeps the work local; model-generated code is never executed: no real sandbox ships).
+
+Troubleshooting: `PLAN_MODIFIE` means the plan's structure changed after sealing (an amendment, or an explicit
+`guard.py derogation`, is needed); `BLOCAGE Vigie` names the finding and the derogation command; `REFUS : PLAN.json
+invalide` names the cycle or the unknown dependency. Measured limits of V3.1 (benchmark, latency): `docs/v3.1/RAPPORT-FINAL.md`.
+
 ## Known limits
 
 - The hooks use `python3`, then `py -3`, then `python`, and exit silently if none works. Tested on Windows (Git Bash and
