@@ -229,15 +229,22 @@ def _progress_hooks(a, plan, t):
         txt = "\n".join(lines)
         txt = txt[:ARCHIVE_MAX_TOKENS * 4]
         if _ev(a, "memory.archive_requested", {"phase": ph}, key="archive|" + ph):
+            import memoire                            # lot 7: the mechanical part is done here by script, 0 token
+            r = memoire.archive(_mdir(a), a.slug)
             bp = os.path.join(_mdir(a), "briefs", "ARCHIVISTE-%s.md" % ph)
             C.atomic_write_text(bp, txt + "\n")
-            print("FIN DE PHASE %s : lancer sr-archiviste (haiku) avec %s" % (ph, os.path.relpath(bp, a.project)))
+            print("FIN DE PHASE %s : memoire rangee par script (%d decision(s), %d lecon(s), %d risque(s) ; %s) ; sr-archiviste (haiku) "
+                  "seulement pour le tableau et la consolidation, avec %s" % (ph, r["decisions"], r["lecons"], r["risques"], r["mode"],
+                                                                            os.path.relpath(bp, a.project)))
     if tasks and all(x.get("status") in ("done", "skipped", "cancelled") for x in tasks):
         if _ev(a, "memory.synthesis_requested", {"tasks": len(tasks)}, key="synthesis"):
+            import memoire
+            memoire.archive(_mdir(a), a.slug)
+            memoire.reprise(_mdir(a), a.slug)
             bp = os.path.join(_mdir(a), "briefs", "SYNTHESE.md")
-            C.atomic_write_text(bp, "# Brief synthese : mission %s\n\nResultats verifies (recus) : %s\n\nEntree : `vault.py brief %s`, "
-                                "decisions et lecons du projet. Ecrire la synthese datee, puis `mission.py close`.\n"
-                                % (a.slug, ", ".join("%s=%s" % (x["id"], x.get("receipt")) for x in tasks), a.slug))
+            C.atomic_write_text(bp, "# Brief synthese : mission %s\n\nResultats verifies (recus) : %s\n\nEntree : REPRISE.md (etat, decisions, "
+                                "risques, budget), `vault.py brief %s`, decisions et lecons du projet. Ecrire la synthese datee, puis "
+                                "`mission.py close`.\n" % (a.slug, ", ".join("%s=%s" % (x["id"], x.get("receipt")) for x in tasks), a.slug))
             print("CLOTURE : lancer sr-synthese (sonnet) avec %s, puis controle final et rapport economique (econ.py rapport)"
                   % os.path.relpath(bp, a.project))
 
@@ -333,6 +340,12 @@ def cmd_status(a):
                                         if os.path.isfile(rp) else "en cours, attendre sa remontee puis `manager.py done %s`" % t["id"]))
     fr = econ.frontier(plan)
     print("pretes : %s" % (", ".join(t["id"] for t in fr) or "aucune"))
+    rp = os.path.join(_mdir(a), "REPRISE.md")
+    if os.path.isfile(rp):                         # lot 7: the compact resume brief written at the last closure/phase
+        with open(rp, encoding="utf-8") as f:
+            body = f.read().splitlines()
+        print("--- REPRISE.md (%s) ---" % os.path.relpath(rp, a.project))
+        print("\n".join(body[:30]))
     return 0
 
 

@@ -84,6 +84,14 @@ class TestIndexSearch(Base):
         r = self.run_v("index")
         self.assertIn("1 retirees", r.stdout)
 
+    def test_full_reindex_works_on_an_existing_index(self):          # V3.1 lot 7: --full crashed (PRAGMA inside a transaction)
+        self.seed()
+        self.assertEqual(self.run_v("index").returncode, 0)
+        r = self.run_v("index", "--full")
+        self.assertEqual(r.returncode, 0, r.stderr)
+        self.assertIn("4 indexees", r.stdout)
+        self.assertIn("a/beta.md", self.run_v("search", "beta").stdout)
+
     def test_touch_without_change_is_not_reindexed(self):
         self.seed()
         self.run_v("index")

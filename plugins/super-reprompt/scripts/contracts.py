@@ -66,14 +66,14 @@ def atomic_write_text(path, text):
             f.write(text)
             f.flush()
             os.fsync(f.fileno())
-        for i in range(20):                       # Windows: a reader holding the target makes replace fail briefly
-            try:
+        for i in range(50):                       # Windows: a reader (antivirus, indexer, another agent) holding the target
+            try:                                  # makes replace fail for a while under load: back off up to ~8 s in total
                 os.replace(tmp, path)
                 return path
             except PermissionError:
-                if i == 19:
+                if i == 49:
                     raise
-                time.sleep(0.05)
+                time.sleep(min(0.25, 0.02 * (i + 1)))
     finally:
         if os.path.exists(tmp):
             os.remove(tmp)

@@ -150,13 +150,14 @@ def cmd_index(ctx, full=False):
     import time
     t0 = time.perf_counter()
     c = open_db(ctx, True)
+    c.commit()
+    c.execute("PRAGMA synchronous=OFF")                 # before any write: a PRAGMA inside the implicit transaction fails
     if full:
         c.execute("DELETE FROM meta")
         c.execute("DELETE FROM notes")
     have = {p: (m, s, h) for p, m, s, h in c.execute("SELECT path,mtime,size,sha FROM meta")}
     cur = scan(ctx)
     seen, n_idx, n_touch = set(), 0, 0
-    c.execute("PRAGMA synchronous=OFF")
     for rel, m, s in cur:
         seen.add(rel)
         old = have.get(rel)
