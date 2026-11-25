@@ -57,3 +57,17 @@ garde l'identifiant mais change d'adresse ne reçoit pas la clé. Aucune redirec
   lire les fichiers de l'utilisateur et ouvrir le réseau.
 - Sans fournisseur connecté, la délégation externe vaut **zéro** : le Relais répond `REPLI haiku`.
 - `providers.json` expire 30 jours après sa date : au-delà, aucun appel tant que les CGU n'ont pas été relues.
+
+## Contrat ProviderAdapter (V3.1, lot 5)
+
+`net/adapters.py` : contrat commun (`provider_id`, `capabilities`, `models`, `availability`, `estimate_cost`, `execute`,
+`health_check`, `timeout`, `cancel`, `usage_metadata`, `error_mapping`) et reponse normalisee (texte, tokens, modele, latence,
+cout etiquete `estimated` ou `unavailable` avec sa date de verification, statut, classe d'erreur, recuperable ou non).
+`relais run` et `relais connect` passent par lui. `execute_with_policy` : tentatives bornees avec backoff et jitter sur les
+seules erreurs recuperables, circuit breaker par fournisseur, repli fini jusqu'au local.
+
+**Execution de code produit par un modele : desactivee.** Aucun vrai bac a sable (systeme de fichiers isole, sans reseau ni
+secret, limites CPU, memoire et temps) n'est fourni ; un processus enfant ou le drapeau `--exec` n'en sont pas un.
+Les types `exec` de `tasks.json` restent donc gardes, meme avec `--exec` et un projet vert, tant qu'un bac a sable reel
+n'est pas branche et teste (`adapters.sandbox_available`).
+

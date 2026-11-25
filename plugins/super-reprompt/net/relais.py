@@ -388,6 +388,12 @@ def rank(elig, task, stats, breaker, need_tokens):
 
 
 # ------------------------------------------------------------------ provider call
+def _adapter_call(p, model, key, messages, excluded):
+    """run_task's provider call through the common ProviderAdapter contract (lot 5 V3.1); returns the historical dict."""
+    import adapters
+    return adapters.adapter_for(p, excluded=excluded).execute(model, messages, key=key, raise_refused=True)["raw"]
+
+
 def call_provider(p, model, key, messages, excluded, max_tokens=MAX_OUT_TOKENS, timeout=90):
     url = check_url(p.get("base_url"), excluded).rstrip("/") + "/chat/completions"
     body = {"model": model, "messages": messages, "temperature": 0, "max_tokens": max_tokens}
@@ -658,9 +664,11 @@ def run_task(args, ctx=None):
         uok, uwhy, _n = utility_gate(volume, task)
         if not uok:
             return "GARDE", "GARDE %s | raison: %s" % (task, uwhy)
-    if t.get("exec") and not (getattr(args, "exec", False) and ctx.color == "vert"):   # review #3
-        return "GARDE", ("GARDE %s | raison: la verification execute du code produit par le modele : exige --exec et un projet vert "
-                         "(isolation, pas bac a sable)" % task)
+    import adapters
+    sb_ok, sb_why = adapters.sandbox_available()
+    if t.get("exec") and not (sb_ok and getattr(args, "exec", False) and ctx.color == "vert"):   # review #3 + CDC 11.4
+        return "GARDE", ("GARDE %s | raison: la verification execute du code produit par le modele : exige un vrai bac a sable, --exec et un projet vert ; "
+                         "%s" % (task, sb_why))
     after = getattr(args, "after", None)
     if after:
         nxt = next_claude(after)
@@ -693,7 +701,7 @@ def run_task(args, ctx=None):
             tried.add(p["id"])
             pm = "%s/%s" % (p["id"], m["id"])
             try:
-                res = call_provider(p, m["id"], ctx.key(p), msgs, excluded)
+                res = _adapter_call(p, m["id"], ctx.key(p), msgs, excluded)
             except Refused as e:
                 attempts.append("%s x refuse (%s)" % (pm, e))
                 continue
@@ -719,7 +727,7 @@ def run_task(args, ctx=None):
                 vok, vdet = verify.check(task, src, out, spec)
                 if vok and t.get("double_pass") and isinstance(obj, dict) and obj:
                     sample = verify.double_pass_sample(list(obj), t["double_pass"])
-                    res2 = call_provider(p, m["id"], ctx.key(p), messages_for(task, gate.text, gate.anon.add(json.dumps(dict(spec_send, items=sample)))), excluded)
+                    res2 = _adapter_call(p, m["id"], ctx.key(p), messages_for(task, gate.text, gate.anon.add(json.dumps(dict(spec_send, items=sample)))), excluded)
                     _t2, obj2 = extract(res2["content"], t.get("out_field")) if res2["ok"] else ("", {})
                     if not isinstance(obj2, dict) or not verify.double_pass_agree(obj, obj2):
                         vok, vdet = False, "double passage en desaccord"
@@ -916,7 +924,7 @@ def run_bench(args):
             pm = "%s/%s" % (p["id"], m["id"])
             row = scores.setdefault(pm, {})
             for typ, src, _good, _bad, spec in bench.cases(root):
-                if tasks()["types"][typ].get("exec") and not (args.exec and ctx.color == "vert"):
+                if tasks()["types"][typ].get("exec") and not (__import__("adapters").sandbox_available()[0] and args.exec and ctx.color == "vert"):
                     row[typ] = None          # not run: would execute model code (review #3)
                     continue
                 ok, gate, _w = privacy_gate(src, ctx.color, [], "bench", names=[])
@@ -952,10 +960,11 @@ def run_connect(args):
 
     def probe(prov, key):
         try:
-            r = call_provider(prov, prov["models"][0]["id"], key, [{"role": "user", "content": "Reponds OK."}], d["excluded"], max_tokens=16)
+            import adapters                    # lot 5 V3.1: the contract's health_check, same network path
+            h = adapters.adapter_for(prov, excluded=d["excluded"]).health_check(key=key, timeout=30)
         except Refused as e:
             return False, str(e)
-        return r["status"] == 200, "HTTP %s" % r["status"]
+        return h["ok"], ("OK %d ms" % h["latency_ms"]) if h["ok"] else (h["error"] or "echec")
     ok = connect.connect_flow(p, store, getpass.getpass, True, probe)
     return (0 if ok else 2), ("etat : connecte" if ok else "etat : non connecte")
 

@@ -654,7 +654,9 @@ class SecurityReview(Base):
         self.assertIn("--exec", so)
         self.assertEqual(s.seen, [])
         rc, so, _se = self.cmd([provider("alpha", s.url)], "--spec", spec, "--exec", task="regex_sql_script")
-        self.assertEqual(rc, 0, so)
+        self.assertEqual(rc, 2, so)                    # V3.1 lot 5 (CDC 11.4): --exec is not a sandbox; without a real one, never
+        self.assertIn("bac a sable", so)
+        self.assertEqual(s.seen, [])
 
     def test_r4_secret_scan_sees_every_occurrence(self):
         sys.path.insert(0, os.path.join(ROOT, "scripts"))
