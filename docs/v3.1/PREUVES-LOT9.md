@@ -37,7 +37,7 @@
 
 ## Critères V3.1
 - A09 ETA : **PASS**. Temps restant révisé à partir des durées observées, en fourchette, avec niveau de confiance.
-- A08 Barre : **NOT MEASURED**. Cette session ne peut pas capturer l'app de bureau : un test monté dans le code ne prouve pas que la barre est visible. La procédure pour Baptiste est dans `dev/show_bar.md`, section V3.1.
+- A08 Barre : **NOT MEASURED**. Cette session ne peut pas capturer l'app de bureau : un test monté dans le code ne prouve pas que la barre est visible. La procédure pour l'utilisateur est dans `dev/show_bar.md`, section V3.1.
 
 ## Non vérifié
 - Rendu réel dans l'app : position, taille, lisibilité, glassmorphism.
