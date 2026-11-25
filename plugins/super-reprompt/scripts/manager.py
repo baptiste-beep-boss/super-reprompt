@@ -87,6 +87,29 @@ def _ev(a, etype, payload, key=None, actor="manager"):
     return C.emit(_mdir(a), etype, actor, payload, mission_id=a.slug, dedup_key=key)
 
 
+def _vigie(a):
+    """drift + post (git state vs seal), both with --json. -> (worst exit code, one-line summary, blocking findings)."""
+    worst, summary, blocks = 0, [], []
+    for cmd in ("drift", "post"):
+        rc, out = _run([sys.executable, os.path.join(HERE, "guard.py"), cmd, "--project", a.project, "--slug", a.slug, "--json"], a.project, timeout=120)
+        worst = max(worst, rc if rc in (3, 4) else 0)
+        j = None
+        for ln in reversed(out.strip().splitlines()):
+            try:
+                j = json.loads(ln)
+                break
+            except ValueError:
+                continue
+        if isinstance(j, dict):
+            for g in j.get("graded", []):
+                if g["severite"] == "blocage" and not any(b["code"] == g["code"] and b["msg"] == g["msg"] for b in blocks):
+                    blocks.append({"code": g["code"], "msg": g["msg"], "via": cmd})
+            summary += ["%s %s [%s]" % (g["code"], g["msg"], g["severite"]) for g in j.get("graded", [])]
+        elif rc not in (0,):
+            summary.append("%s indisponible (code %d)" % (cmd, rc))
+    return worst, (" ; ".join(summary)[:200] or "aucun ecart"), blocks
+
+
 # ------------------------------------------------------------------ next
 def _retry_failed(a, plan):
     msgs = []
@@ -161,6 +184,19 @@ def cmd_next(a):
             print("ALERTE budget : phase %s a %d / %s tokens (>= 80 %%)" % (ph, b["total"], b["budget"]))
     rc, vb = _run([sys.executable, os.path.join(HERE, "vault.py"), "brief", a.slug], a.project, timeout=60)
     print("brief vault : " + (" | ".join(vb.strip().splitlines()[:6]) if rc == 0 and vb.strip() else "aucun"))
+    if os.path.isfile(os.path.join(mdir, "SCELLE.json")):      # before any dispatch (lot 8): a blocking finding holds it
+        vrc, vig, blocks = _vigie(a)
+        if blocks:
+            _ev(a, "vigie.block", {"task": None, "findings": blocks}, key="block-next|%s" % json.dumps(blocks, sort_keys=True), actor="system")
+            print("BLOCAGE Vigie : aucun dispatch : %s" % " ; ".join("%s %s" % (b["code"], b["msg"]) for b in blocks)[:300])
+            print("Corriger, ou derogation explicite : guard.py derogation --code CODE --by NOM --reason \"...\"")
+            return 5
+        for t in plan.get("tasks", []):
+            if t.get("status") == "blocked" and t.get("blocked_by") == "vigie":
+                C.transition(t, "ready")
+                t.pop("blocked_by", None)
+                _ev(a, "vigie.unblock", {"task": t["id"]}, key="unblock|%s|%s" % (t["id"], t.get("updated_at")), actor="system")
+                print("%s debloquee : plus aucun constat bloquant (corrige ou deroge)" % t["id"])
     for m in _retry_failed(a, plan):
         print(m)
     running = [t for t in plan.get("tasks", []) if t.get("status") == "running"]
@@ -294,8 +330,16 @@ def cmd_done(a):
         C.transition(t, "running")
     if t["status"] == "running":
         C.transition(t, "review")
-    vrc, vout = _run([sys.executable, os.path.join(HERE, "guard.py"), "drift", "--project", a.project, "--slug", a.slug], a.project, timeout=120)
-    vig = " ".join(vout.strip().splitlines()[:2])[:160] or "aucun ecart"
+    vrc, vig, blocks = _vigie(a)                    # after execution: drift + post (lot 8), graded
+    if blocks and rec["status"] == "ok":            # a blocking finding STOPS the closure, it does not just print
+        C.transition(t, "blocked")
+        t["blocked_by"] = "vigie"
+        _save(p, plan)
+        _ev(a, "vigie.block", {"task": t["id"], "run_id": rid, "findings": blocks}, key="block|%s|%s" % (rid, json.dumps(blocks, sort_keys=True)), actor="system")
+        print("BLOCAGE Vigie : %s reste bloquee : %s" % (t["id"], " ; ".join("%s %s" % (b["code"], b["msg"]) for b in blocks)[:300]))
+        print("Corriger, ou derogation explicite de l'utilisateur : guard.py derogation --code CODE --by NOM --reason \"...\" "
+              "--project %s --slug %s (journalisee)" % (a.project, a.slug))
+        return 5
     if rec["status"] == "ok":
         C.transition(t, "done", receipt=rec)
     else:

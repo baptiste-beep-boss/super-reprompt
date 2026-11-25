@@ -7,7 +7,7 @@ import time
 
 DIR = ".super-reprompt"
 SAFE_RM = ("__pycache__", "node_modules", "build", "dist", ".pytest_cache", ".mypy_cache", "tmp", "temp", ".cache", "coverage", "htmlcov")
-MISSION_FILES = ("scelle.json", "state.json", "ordre.md", "progress.json", "journal.ndjson", "events.ndjson", "derives.json", "ferme")
+MISSION_FILES = ("scelle.json", "state.json", "ordre.md", "progress.json", "journal.ndjson", "events.ndjson", "derives.json", "derogations.json", "ferme")
 PROT_NAMES = ("scelle.json", "settings.json", "settings.local.json", "hooks.json", "guard.py", "guard_core.py")
 DEF_HOSTS = ("localhost", "127.0.0.1", "::1", "[::1]", "0.0.0.0")
 FIN_TOOLS = ("execute_order", "execute_spot", "execute_prediction", "execute_tpsl", "deposit_earn", "withdraw_earn", "close_position",
@@ -21,6 +21,8 @@ INLINE = ("python", "python3", "py", "pythonw", "node", "nodejs", "deno", "bun",
 SHELLS = ("bash", "sh", "zsh", "pwsh", "powershell", "cmd", "wsl")
 SECRET_TRIG = ("sk-", "sk_", "ghp_", "gho_", "ghs_", "github_pat_", "akia", "aiza", "xox", "-----begin", "eyj", "api_key", "apikey", "api-key",
                "secret", "token", "passw", "bearer", "private_key", "privatekey")
+SEVERITY = {"PLAN_ABSENT": "info", "FICHIER_SANS_EXIGENCE": "avertissement", "EXIGENCE_SANS_TACHE": "avertissement",
+            "BUDGET_ALERTE": "avertissement", "BUDGET_DEPASSE": "avertissement"}   # every other finding: blocage (lot 8 V3.1)
 DEF = {}   # context of the current call
 
 
@@ -917,10 +919,15 @@ def _cli():
             out.append(("PLAN_ABSENT", "PLAN.json manquant: impossible de relier fichiers et exigences"))
         mx = (seal.get("budget") or {}).get("max_tokens")
         pg = os.path.join(mdir, "PROGRESS.json")
-        if mx and os.path.isfile(pg):
+        if mx and os.path.isfile(pg):                   # graduated (lot 8 V3.1): 80 % warn, 100 % over, 150 % block
             used = load(pg).get("tokens_used")
-            if isinstance(used, (int, float)) and used > mx:
-                out.append(("BUDGET_DEPASSE", "%s > %s" % (used, mx)))
+            if isinstance(used, (int, float)):
+                if used > mx:
+                    out.append(("BUDGET_DEPASSE", "%s > %s" % (used, mx)))
+                elif used >= 0.8 * mx:
+                    out.append(("BUDGET_ALERTE", "%s >= 80 %% de %s" % (used, mx)))
+                if used >= 1.5 * mx:
+                    out.append(("BUDGET_ARRET", "%s >= 150 %% de %s : arret, question a l'utilisateur" % (used, mx)))
         evs = []
         for jn in ("journal.ndjson", "events.ndjson"):         # legacy journal first, then the unified one
             jp = os.path.join(mdir, jn)
@@ -947,20 +954,44 @@ def _cli():
     def _emit(out, a, kind, mdir):
         dp = os.path.join(mdir, "derives.json")
         cnt = load(dp) if os.path.isfile(dp) else {}
+        der = load(os.path.join(mdir, "derogations.json")) if os.path.isfile(os.path.join(mdir, "derogations.json")) else {}
         worst = 0
+        graded = []
         for code, msg in out:
             sig = code + ":" + msg
             n = cnt.get(sig, 0) + 1
             cnt[sig] = n
-            lvl = 4 if n >= 2 else 3
-            worst = max(worst, lvl if code != "PLAN_ABSENT" else 0)
-            print("[%s] %s %s -> %s" % (kind, code, msg, "QUESTION a l'utilisateur (2e fois)" if n >= 2 and code != "PLAN_ABSENT" else "corriger" if code != "PLAN_ABSENT" else "info"))
+            sev = SEVERITY.get(code, "blocage")
+            d = der.get(code)
+            if d and (not d.get("msg") or d["msg"] in msg):      # explicit, attributed waiver: downgraded, still shown
+                sev = "info"
+            graded.append({"code": code, "msg": msg, "severite": sev, "occurrence": n,
+                           "derogation": ("%s : %s" % (d.get("by"), d.get("reason"))) if d and sev == "info" and SEVERITY.get(code, "blocage") != "info" else None})
+            if sev != "info":
+                worst = max(worst, 4 if n >= 2 else 3)
+            act = ("info" if sev == "info" else "QUESTION a l'utilisateur (2e fois)" if n >= 2 else "corriger")
+            print("[%s] %s %s -> %s [%s%s]" % (kind, code, msg, act, sev, (", derogation " + graded[-1]["derogation"]) if graded[-1]["derogation"] else ""))
+            contracts.emit(mdir, "vigie.finding", "system", {"kind": kind, "code": code, "msg": msg[:200], "severite": sev, "occurrence": n},
+                           dedup_key="finding|%s|%s|%d|%s" % (kind, sig, n, sev))
         contracts.atomic_write_json(dp, cnt)
         if getattr(a, "json", False):
-            print(json.dumps({"findings": out, "exit": worst}, ensure_ascii=False))
+            print(json.dumps({"findings": out, "exit": worst, "graded": graded,
+                              "bloquant": any(g["severite"] == "blocage" for g in graded)}, ensure_ascii=False))
         if not out:
             print("[%s] aucun ecart" % kind)
         raise SystemExit(worst)
+
+    def cmd_derogation(a):
+        """Explicit waiver of ONE finding code (optionally one message), attributed and journalled. Never silent."""
+        proj, mdir = locate(a)
+        if not a.by.strip() or not a.reason.strip():
+            raise SystemExit("derogation refusee : --by et --reason sont obligatoires")
+        dp = os.path.join(mdir, "derogations.json")
+        der = load(dp) if os.path.isfile(dp) else {}
+        der[a.code] = {"by": a.by, "reason": a.reason, "msg": a.msg or "", "date": time.strftime("%Y-%m-%dT%H:%M:%S")}
+        contracts.atomic_write_json(dp, der)
+        contracts.emit(mdir, "vigie.derogation", "user", {"code": a.code, "msg": a.msg or "", "by": a.by, "reason": a.reason})
+        print("DEROGATION %s accordee par %s : %s (journalisee)" % (a.code, a.by, a.reason))
 
     def cmd_close(a):
         proj, mdir = locate(a)
@@ -984,6 +1015,14 @@ def _cli():
     v.add_argument("--grants", default="")
     v.add_argument("--approved-by", dest="approved_by", required=True)
     v.set_defaults(f=cmd_avenant)
+    g = sub.add_parser("derogation")
+    g.add_argument("--project")
+    g.add_argument("--slug")
+    g.add_argument("--code", required=True)
+    g.add_argument("--msg", default="")
+    g.add_argument("--by", required=True)
+    g.add_argument("--reason", required=True)
+    g.set_defaults(f=cmd_derogation)
     for nm, fn in (("drift", cmd_drift), ("post", cmd_post), ("close", cmd_close)):
         p = sub.add_parser(nm)
         p.add_argument("--project")
@@ -995,7 +1034,7 @@ def _cli():
 
 
 def main():
-    if len(sys.argv) > 1 and sys.argv[1] in ("seal", "drift", "post", "close", "avenant", "-h", "--help"):
+    if len(sys.argv) > 1 and sys.argv[1] in ("seal", "drift", "post", "close", "avenant", "derogation", "-h", "--help"):
         _cli()
     else:
         try:

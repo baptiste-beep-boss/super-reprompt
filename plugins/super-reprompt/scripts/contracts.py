@@ -29,7 +29,7 @@ TRANSITIONS = {
     "proposed": ("ready", "blocked", "cancelled", "skipped"),
     "ready": ("running", "blocked", "cancelled", "skipped"),
     "running": ("review", "failed", "blocked", "cancelled"),
-    "review": ("done", "failed", "running"),
+    "review": ("done", "failed", "running", "blocked"),            # blocked: a blocking Vigie finding holds the closure
     "blocked": ("ready", "cancelled", "skipped"),
     "failed": ("ready", "blocked", "cancelled", "skipped"),       # blocked: attempts exhausted, a human decides
     "done": (), "cancelled": (), "skipped": (),
@@ -342,7 +342,7 @@ def check(kind, obj, strict=False):
     return obj
 
 
-PROGRESS_KEYS = ("status", "attempt", "receipt", "updated_at", "owner", "started_at", "finished_at", "execution_mode")
+PROGRESS_KEYS = ("status", "attempt", "receipt", "updated_at", "owner", "started_at", "finished_at", "execution_mode", "blocked_by")
 
 
 def plan_structure_sha(plan):
