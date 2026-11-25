@@ -124,8 +124,11 @@ def write(mdir):
 
 def main(argv=None):
     argv = sys.argv[1:] if argv is None else argv
-    if not argv:
+    if not argv or argv[0] in ("-h", "--help"):
         print(__doc__)
+        return 0 if argv else 2
+    if not os.path.isfile(os.path.join(argv[0], "PLAN.json")):
+        print("REFUS : %s n'est pas un dossier de mission (PLAN.json absent) ; rien n'est ecrit" % argv[0])
         return 2
     print(json.dumps(write(argv[0]), ensure_ascii=False, indent=1))
     return 0
