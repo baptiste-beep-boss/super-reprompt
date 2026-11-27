@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
-"""UserPromptSubmit hook (H1): suggest framing a large request. Never blocks, never orders.
+"""UserPromptSubmit hook (H1): suggest framing a large request, or (lot 11) engage the independent-check protocol on a
+non-trivial code task. Never blocks, never orders.
 
 Reads the hook JSON on stdin. Prints at most ONE line (plain stdout of a UserPromptSubmit hook is added to
 Claude's context) when the prompt scores at least THRESHOLD, otherwise prints nothing. Always exits 0.
@@ -157,6 +158,61 @@ def suggestion_line(score, labels, lang):
             "they can also say \"go direct\" to skip framing." % (score, THRESHOLD, why, SKILL_COMMAND))
 
 
+# ------------------------------------------------------------------ Lot 11 : tache de code non triviale
+# Constat du banc V3.1 : « Realise le projet decrit dans ENONCE.md. » (40 caracteres) restait sous MIN_LEN et le cycle
+# ne se declenchait jamais. Ce detecteur est INDEPENDANT du score de cadrage : il reconnait une tache de CONSTRUCTION de
+# code (verbe de construction + fichier de specification, ou au moins deux objets de code) et ajoute UN protocole court
+# de verification independante. Il ne cadre pas, ne planifie pas, ne bloque rien.
+BUILD_VERB_RX = _rx(r"\b(realis\w*|implement\w*|develop\w*|construi\w*|construct\w*|build\w*|cod(e|er|ez|ons)|ecri(s|re|vez|vons|t)|"
+                    r"cree[rz]?|creat\w*|programm\w*|fabriqu\w*|write|make|generat\w*|genere\w*)\b")
+SPEC_FILE_RX = _rx(r"\b[\w./\\-]*(?:enonce|spec|specification|specifications|cahier|brief|consignes?|readme|requirements?|cdc|todo|issue)"
+                   r"[\w.-]*\.(?:md|txt|rst|pdf)\b")
+CODE_OBJECT_RX = _rx(r"\b(projets?|projects?|modules?|bibliotheques?|librairies?|librar(?:y|ies)|api|applications?|app|parseurs?|parsers?|"
+                     r"evaluateurs?|interpreteurs?|compilateurs?|moteurs?|engines?|frameworks?|packages?|cli|serveurs?|server|"
+                     r"classes?|algorithmes?|algorithms?|tests?)\b")
+ENGAGE_WAIVER_RX = _rx(r"(sans (la )?contre-?epreuve|pas de contre-?epreuve|sans (test )?adverse|no (adversarial|counter)[- ]?(check|test|pass)|"
+                       r"skip the (adversarial|counter)|sans verification|essai rapide|quick (try|draft)|rapide et sale|prototype jetable)")
+QUESTION_START_RX = _rx(r"^\s*(comment|how|pourquoi|why|peux-tu|pouvez-vous|can you|could you|est-ce que|qu'est|what|quel|quelle|quels|"
+                        r"quelles|lis|read|resume|summari|explique|explain|renomme|rename)\b")
+
+
+def is_code_task(prompt):
+    """True si l'invite demande de CONSTRUIRE du code de facon non triviale. Fonction pure, sans effet de bord."""
+    if not isinstance(prompt, str):
+        return False
+    raw = prompt.strip()
+    if len(raw) < 20 or raw[0] in "/!":
+        return False
+    t = norm(raw)
+    if "super-reprompt" in t or WAIVER_RX.search(t) or ENGAGE_WAIVER_RX.search(t):
+        return False
+    if raw.endswith("?") or QUESTION_START_RX.match(t):
+        return False
+    if not BUILD_VERB_RX.search(t):
+        return False
+    if SPEC_FILE_RX.search(t):
+        return True
+    objects = {m.group(1) for m in CODE_OBJECT_RX.finditer(t)}
+    return len(objects) >= 2
+
+
+def engage_line(lang):
+    if lang == "fr":
+        return ("[super-reprompt] Tâche de code détectée. Pas de cadrage ni de plan : fais le travail, puis un seul passage de "
+                "contre-épreuve. (1) Écris le code et ses propres tests. (2) Avant de conclure, lance UN sous-agent testeur "
+                "(outil Agent, subagent_type `super-reprompt:sr-testeur`, à défaut general-purpose en model sonnet) en lui "
+                "donnant seulement le chemin de l'énoncé et celui du module ; il ne lit ni ton code ni tes tests, écrit "
+                "test_adverse.py d'après l'énoncé et rend la liste de ses échecs. (3) Corrige ce que l'énoncé exige ; "
+                "écarte un test qui contredit l'énoncé en disant pourquoi. (4) Relance tous les tests et conclus. "
+                "Pour l'éviter, l'utilisateur peut dire « sans contre-épreuve ».")
+    return ("[super-reprompt] Code task detected. No framing and no plan: do the work, then one pass of independent checking. "
+            "(1) Write the code and its own tests. (2) Before concluding, launch ONE tester sub-agent (Agent tool, subagent_type "
+            "`super-reprompt:sr-testeur`, or general-purpose with model sonnet) and give it only the path of the spec and the "
+            "module; it must not read your code or your tests, writes test_adverse.py from the spec and reports its failures. "
+            "(3) Fix what the spec requires; set aside a test that contradicts the spec, saying why. (4) Rerun all tests and "
+            "conclude (one pass only). The user can opt out by saying \"no adversarial check\".")
+
+
 def estimate_conversation_tokens(transcript_path):
     """Rough token estimate from the transcript file size, or None. Never opens the file."""
     if not isinstance(transcript_path, str) or not transcript_path.strip():
@@ -248,11 +304,18 @@ def body():
     prompt = data.get("prompt")
     if not isinstance(prompt, str):
         return
+    sid = data.get("session_id")
+    now = time.time()
+    if is_code_task(prompt):
+        if in_cooldown(sid, now) or framing_in_progress(data.get("cwd") or os.getcwd(), sid):
+            return
+        set_cooldown(sid, now)
+        L.emit(engage_line(detect_lang(norm(prompt))))
+        L.log("hook_suggest", "engage code task")
+        return
     score, labels, why, lang = score_prompt(prompt)
     if why is not None or score < THRESHOLD:
         return
-    sid = data.get("session_id")
-    now = time.time()
     if in_cooldown(sid, now):
         return
     if framing_in_progress(data.get("cwd") or os.getcwd(), sid):
