@@ -143,6 +143,9 @@ def main():
                 if (arm, projet, k) in done:
                     continue                      # reprise : un essai deja journalise n'est pas relance
                 r = run_trial(a, arm, projet, k)
+                if a.dry_run:                     # a blanc : jamais dans le journal, sinon la reprise le prendrait pour un essai fait
+                    print(json.dumps(r, ensure_ascii=False)[:400], flush=True)
+                    continue
                 with open(journal, "a", encoding="utf-8") as f:
                     f.write(json.dumps(r, ensure_ascii=False) + "\n")
                 print(json.dumps(r, ensure_ascii=False)[:400], flush=True)

@@ -67,3 +67,6 @@ Lecture :
 3. Prochaine etape pour mesurer un vrai multiplicateur : un banc **difficile** (projet de plusieurs modules, specification
    longue, cas pieges nombreux) ou Claude nu echoue nettement, puis comparer nu, contre-epreuve adverse, et equipe
    parallele (worktrees). Sans ce banc, toute promesse de « x3 » reste non mesuree.
+
+## 6. Suite (27/11/2026)
+Contre-épreuve intégrée comme **option** (lot 11) et mesurée sur la tâche `semver`, n = 3 : aucun gain de qualité, surcoût de +43 % (Sonnet) à +69 % (Haiku) en tokens. Haiku seul égale Sonnet seul à 3,3 fois moins en équivalent API. Détail : `v32/RESULTATS.md`.

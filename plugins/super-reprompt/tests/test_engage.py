@@ -78,20 +78,39 @@ class EngageHookEndToEnd(unittest.TestCase):
         self.home = tempfile.mkdtemp(prefix="srhome-")
         self.cwd = tempfile.mkdtemp(prefix="srcwd-")
 
-    def test_invite_courte_de_code_emet_le_protocole(self):
+    OPT_IN = {"SUPER_REPROMPT_ENGAGE": "1"}
+
+    def test_par_defaut_la_contre_epreuve_n_est_pas_declenchee(self):
+        """Mesure du 27/11/2026 (semver, n = 3) : +43 % de tokens avec Sonnet, +69 % avec Haiku, aucun test de plus reussi.
+        Le protocole ne doit donc pas etre actif par defaut."""
         rc, out = self.run_hook("Réalise le projet décrit dans ENONCE.md.")
+        self.assertEqual((rc, out.strip()), (0, ""))
+
+    def test_invite_courte_de_code_emet_le_protocole_si_active(self):
+        rc, out = self.run_hook("Réalise le projet décrit dans ENONCE.md.", extra_env=self.OPT_IN)
         self.assertEqual(rc, 0)
         self.assertIn("[super-reprompt]", out)
         self.assertIn("sr-testeur", out)
 
+    def test_demande_explicite_dans_l_invite_suffit(self):
+        for p in ("Réalise le projet décrit dans ENONCE.md, avec contre-épreuve.",
+                  "Implement the module described in SPEC.md, with an adversarial check."):
+            rc, out = self.run_hook(p, sid="s-opt-" + str(abs(hash(p))))
+            self.assertEqual(rc, 0)
+            self.assertIn("sr-testeur", out, p)
+
+    def test_refus_explicite_l_emporte_sur_l_activation(self):
+        rc, out = self.run_hook("Réalise le projet décrit dans ENONCE.md, sans contre-épreuve.", extra_env=self.OPT_IN)
+        self.assertEqual((rc, out.strip()), (0, ""))
+
     def test_une_seule_fois_par_session_puis_silence(self):
-        _rc, first = self.run_hook("Réalise le projet décrit dans ENONCE.md.", sid="s-2")
-        _rc, second = self.run_hook("Réalise aussi le projet décrit dans AUTRE.md.", sid="s-2")
+        _rc, first = self.run_hook("Réalise le projet décrit dans ENONCE.md.", sid="s-2", extra_env=self.OPT_IN)
+        _rc, second = self.run_hook("Réalise aussi le projet décrit dans AUTRE.md.", sid="s-2", extra_env=self.OPT_IN)
         self.assertIn("sr-testeur", first)
         self.assertEqual(second.strip(), "")
 
     def test_hooks_coupes_silence_total(self):
-        rc, out = self.run_hook("Réalise le projet décrit dans ENONCE.md.", extra_env={"SUPER_REPROMPT_HOOKS": "0"})
+        rc, out = self.run_hook("Réalise le projet décrit dans ENONCE.md.", extra_env={"SUPER_REPROMPT_HOOKS": "0", "SUPER_REPROMPT_ENGAGE": "1"})
         self.assertEqual((rc, out.strip()), (0, ""))
 
     def test_demande_triviale_aucune_sortie(self):

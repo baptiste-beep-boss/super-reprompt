@@ -196,6 +196,20 @@ def is_code_task(prompt):
     return len(objects) >= 2
 
 
+OPT_IN_RX = _rx(r"(avec (une |la )?contre-?epreuve|double verification|verification independante|with (an |a )?(adversarial|independent) "
+                r"(check|test|review|pass)|adversarial (check|pass))")
+
+
+def engage_wanted(prompt):
+    """Le protocole est OPTIONNEL : banc du 27/11/2026 (semver, n = 3), il coute +43 % de tokens avec Sonnet et +69 % avec
+    Haiku pour aucun test de plus reussi. Actif seulement si SUPER_REPROMPT_ENGAGE=1 ou si l'invite le demande."""
+    if not is_code_task(prompt):
+        return False
+    if os.environ.get("SUPER_REPROMPT_ENGAGE", "").strip().lower() in ("1", "on", "true", "oui", "yes"):
+        return True
+    return bool(OPT_IN_RX.search(norm(prompt)))
+
+
 def engage_line(lang):
     if lang == "fr":
         return ("[super-reprompt] Tâche de code détectée. Pas de cadrage ni de plan : fais le travail, puis un seul passage de "
@@ -306,7 +320,7 @@ def body():
         return
     sid = data.get("session_id")
     now = time.time()
-    if is_code_task(prompt):
+    if engage_wanted(prompt):
         if in_cooldown(sid, now) or framing_in_progress(data.get("cwd") or os.getcwd(), sid):
             return
         set_cooldown(sid, now)
